@@ -1,0 +1,2 @@
+import { Card } from '../../components/ui/Card';import { sessions } from '../../data/mockData';
+export default function ParentSessions(){return <Card><h2>Child Session Summaries</h2><div className="grid grid-3">{sessions.slice(-3).map(s=><div className="student-card" key={s.id}><h3>{s.title}</h3><p className="muted">{s.date} · {s.durationMinutes} min</p><p>Abdullah participated and received appropriate classroom support.</p></div>)}</div></Card>}
