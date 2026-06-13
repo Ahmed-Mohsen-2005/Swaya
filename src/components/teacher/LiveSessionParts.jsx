@@ -1,46 +1,50 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Activity, AlertTriangle, Bot, CheckCircle2, Eye, HeartPulse, Pause, Play, Repeat2, Smile, Square, Users, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, Bot, Eye, HeartPulse, Pause, Play, Smile, Square, Users } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { MetricCard } from '../ui/MetricCard';
 import { StatusBadge } from '../ui/StatusBadge';
-import { LiveLineChart, MiniLineChart } from '../charts/SimpleCharts';
+import { MiniLineChart } from '../charts/SimpleCharts';
 import { pct, statusFromMetrics } from '../../utils/formatters';
 import { scenarios } from '../../simulation/scenarios';
 import { useLiveSessionStore } from '../../store/liveSessionStore';
+import { useI18n } from '../../i18n';
 
 const fadeItem = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 4 }, transition: { duration: 0.18 } };
 
 export function SessionHeader({ classes, selectedClassId, setSelectedClassId, onStart }) {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
   const active = st.status === 'active';
+  const asdCount = st.students?.filter(student => student.classification === 'ASD').length || 0;
+
   return (
     <Card className={active ? 'glass' : ''}>
       <div className="grid" style={{ gridTemplateColumns: '1.2fr .75fr .85fr 1.15fr', gap: 14, alignItems: 'center' }}>
         <div>
-          <div className="small muted">Class</div>
-          <select className="select" value={selectedClassId} onChange={e => setSelectedClassId(e.target.value)} disabled={active}>
-            {classes.map(c => <option value={c.id} key={c.id}>{c.name}</option>)}
+          <div className="small muted">{t('Class')}</div>
+          <select className="select" value={selectedClassId} onChange={event => setSelectedClassId(event.target.value)} disabled={active}>
+            {classes.map(classroom => <option value={classroom.id} key={classroom.id}>{classroom.name}</option>)}
           </select>
-          <div className="small muted" style={{ marginTop: 8 }}>Students: {st.students?.length || 8} · ASD: 5</div>
+          <div className="small muted" style={{ marginTop: 8 }}>{t('Students')}: {st.students?.length || 0} · {t('ASD students')}: {asdCount}</div>
         </div>
         <div>
-          <div className="small muted">Class status</div>
-          <StatusBadge status={active ? 'active' : st.status === 'paused' ? 'warning' : 'gray'}>{st.status === 'idle' ? 'Not started' : st.status}</StatusBadge>
+          <div className="small muted">{t('Class status')}</div>
+          <StatusBadge status={active ? 'active' : st.status === 'paused' ? 'warning' : 'gray'}>{st.status === 'idle' ? t('Not started') : t(st.status)}</StatusBadge>
         </div>
         <div>
-          <div className="small muted">Session time</div>
+          <div className="small muted">{t('Session time')}</div>
           <h2 style={{ margin: '5px 0', fontSize: 22 }}>00:{String(18 + st.tick).padStart(2, '0')}:{String((st.tick * 2) % 60).padStart(2, '0')}</h2>
-          <div className="small muted">Started 09:00 AM</div>
+          <div className="small muted">{t('Started 09:00 AM')}</div>
         </div>
         <div style={{ display: 'flex', gap: 9, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
           {st.status === 'idle' || st.status === 'ended'
-            ? <Button onClick={onStart}><Play size={16}/>Start Session</Button>
+            ? <Button onClick={onStart}><Play size={16} />{t('Start Session')}</Button>
             : st.status === 'paused'
-              ? <Button variant="green" onClick={st.resumeSession}><Play size={16}/>Resume</Button>
-              : <Button variant="soft" onClick={st.pauseSession}><Pause size={16}/>Pause</Button>}
-          <Button variant="danger" onClick={st.endSession}><Square size={14}/>End</Button>
+              ? <Button variant="green" onClick={st.resumeSession}><Play size={16} />{t('Resume')}</Button>
+              : <Button variant="soft" onClick={st.pauseSession}><Pause size={16} />{t('Pause')}</Button>}
+          <Button variant="danger" onClick={st.endSession}><Square size={14} />{t('End')}</Button>
         </div>
       </div>
     </Card>
@@ -48,32 +52,34 @@ export function SessionHeader({ classes, selectedClassId, setSelectedClassId, on
 }
 
 export function ScenarioController({ students }) {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
+
   return (
     <Card className="glass">
       <div className="section-title">
         <div>
-          <h2>Demo Control Panel</h2>
-          <p className="small muted" style={{ margin: '3px 0 0' }}>Simulated metrics refresh every 2 seconds.</p>
+          <h2>{t('Demo Control Panel')}</h2>
+          <p className="small muted" style={{ margin: '3px 0 0' }}>{t('Simulated metrics refresh every 2 seconds.')}</p>
         </div>
-        <span className="badge blue"><Activity size={13}/>Live simulation</span>
+        <span className="badge blue"><Activity size={13} />{t('Live simulation')}</span>
       </div>
       <div className="grid grid-3">
         <label>
-          <div className="small muted">Scenario</div>
-          <select className="select" style={{ width: '100%' }} value={st.selectedScenario} onChange={e => st.setScenario(e.target.value, st.targetStudentId || students[0]?.id)}>
-            {scenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          <div className="small muted">{t('Scenario')}</div>
+          <select className="select" style={{ width: '100%' }} value={st.selectedScenario} onChange={event => st.setScenario(event.target.value, st.targetStudentId || students[0]?.id)}>
+            {scenarios.map(scenario => <option key={scenario.id} value={scenario.id}>{scenario.name}</option>)}
           </select>
         </label>
         <label>
-          <div className="small muted">Target student</div>
-          <select className="select" style={{ width: '100%' }} value={st.targetStudentId || students[0]?.id || ''} onChange={e => st.setScenario(st.selectedScenario, e.target.value)}>
-            {students.map(s => <option key={s.id} value={s.id}>{s.fullName}</option>)}
+          <div className="small muted">{t('Target student')}</div>
+          <select className="select" style={{ width: '100%' }} value={st.targetStudentId || students[0]?.id || ''} onChange={event => st.setScenario(st.selectedScenario, event.target.value)}>
+            {students.map(student => <option key={student.id} value={student.id}>{student.fullName}</option>)}
           </select>
         </label>
         <div style={{ display: 'flex', alignItems: 'end', gap: 9, flexWrap: 'wrap' }}>
-          <Button onClick={() => st.setScenario(st.selectedScenario, st.targetStudentId || students[0]?.id)}>Apply Scenario</Button>
-          <span className="badge gray">Teacher demo mode</span>
+          <Button onClick={() => st.setScenario(st.selectedScenario, st.targetStudentId || students[0]?.id)}>{t('Apply Scenario')}</Button>
+          <span className="badge gray">{t('Teacher demo mode')}</span>
         </div>
       </div>
     </Card>
@@ -81,47 +87,51 @@ export function ScenarioController({ students }) {
 }
 
 export function ClassMetrics() {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
-  const m = st.currentClassMetrics;
-  const activeAlerts = st.alerts.filter(a => a.status === 'active').length;
-  const need = Object.values(st.currentStudentMetrics).filter(x => statusFromMetrics(x) !== 'stable').length;
+  const metrics = st.currentClassMetrics;
+  const activeAlerts = st.alerts.filter(alert => alert.status === 'active').length;
+  const needAttention = Object.values(st.currentStudentMetrics).filter(item => statusFromMetrics(item) !== 'stable').length;
+
   return (
     <div className="grid grid-5">
-      <MetricCard icon={<Eye/>} label="Avg Attention" value={pct(m.attention)} status="stable" trend="+6% vs last 5 min"/>
-      <MetricCard icon={<Smile/>} label="Avg Engagement" value={pct(m.engagement)} color="green" status="improving" trend="+8% vs last 5 min"/>
-      <MetricCard icon={<HeartPulse/>} label="Avg Stress" value={pct(m.stress)} color={m.stress > 60 ? 'red' : 'orange'} status={m.stress > 60 ? 'high' : 'normal'} trend="-12% vs last 5 min"/>
-      <MetricCard icon={<AlertTriangle/>} label="Active Alerts" value={activeAlerts} color={activeAlerts > 2 ? 'red' : 'orange'} status={`${st.alerts.filter(a => a.severity === 'critical').length} critical`} trend="requires review"/>
-      <MetricCard icon={<Users/>} label="Needs Attention" value={need} color="purple" status="class" trend={`${Math.round(need / (st.students.length || 1) * 100)}% of class`}/>
+      <MetricCard icon={<Eye />} label="Avg Attention" value={pct(metrics.attention)} trend={t('+6% vs last 5 min')} />
+      <MetricCard icon={<Smile />} label="Avg Engagement" value={pct(metrics.engagement)} color="green" trend={t('+8% vs last 5 min')} />
+      <MetricCard icon={<HeartPulse />} label="Avg Stress" value={pct(metrics.stress)} color={metrics.stress > 60 ? 'red' : 'orange'} trend={t('-12% vs last 5 min')} />
+      <MetricCard icon={<AlertTriangle />} label="Active Alerts" value={activeAlerts} color={activeAlerts > 2 ? 'red' : 'orange'} trend={t('Requires review')} />
+      <MetricCard icon={<Users />} label="Needs Attention" value={needAttention} color="blue" trend={`${Math.round(needAttention / (st.students.length || 1) * 100)}% ${t('of class')}`} />
     </div>
   );
 }
 
 export function AlertsPanel() {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
-  const active = st.alerts.filter(a => a.status === 'active').slice(-5).reverse();
+  const activeAlerts = st.alerts.filter(alert => alert.status === 'active').slice(-5).reverse();
+
   return (
     <Card>
       <div className="section-title">
-        <h2>Alerts ({active.length})</h2>
-        <span className="small muted">Active only</span>
+        <h2>{t('Alerts')} ({activeAlerts.length})</h2>
+        <span className="small muted">{t('Active only')}</span>
       </div>
       <div className="grid">
         <AnimatePresence initial={false}>
-          {active.length === 0
-            ? <motion.div {...fadeItem} className="muted">No active alerts. Class status is stable.</motion.div>
-            : active.map(a => (
-              <motion.div {...fadeItem} layout key={a.id} className={`alert-card ${a.severity === 'critical' ? 'critical' : ''}`}>
+          {activeAlerts.length === 0
+            ? <motion.div {...fadeItem} className="muted">{t('No active alerts. Class status is stable.')}</motion.div>
+            : activeAlerts.map(alert => (
+              <motion.div {...fadeItem} layout key={alert.id} className={`alert-card ${alert.severity === 'critical' ? 'critical' : ''}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <div><b>{a.studentName}</b><div className="small muted">{a.type.replace('_', ' ')}</div></div>
-                  <StatusBadge status={a.severity === 'critical' ? 'critical' : 'warning'}>{a.severity}</StatusBadge>
+                  <div><b>{alert.studentName}</b><div className="small muted">{t(alert.type.replace('_', ' '))}</div></div>
+                  <StatusBadge status={alert.severity === 'critical' ? 'critical' : 'warning'}>{t(alert.severity)}</StatusBadge>
                 </div>
                 <div style={{ margin: '9px 0' }}>
-                  <b style={{ color: a.severity === 'critical' ? 'var(--red)' : 'var(--orange)' }}>{a.message}</b>
-                  <br/><span className="small">Suggested intervention: {a.suggestedAction}</span>
+                  <b style={{ color: alert.severity === 'critical' ? 'var(--red)' : 'var(--orange)' }}>{alert.message}</b>
+                  <br /><span className="small">{t('Suggested intervention')}: {alert.suggestedAction}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <Button variant="soft" onClick={() => st.focusStudent(a.studentId)} style={{ flex: 1 }}>Focus</Button>
-                  <Button variant="green" onClick={() => st.markAlertHandled(a.id)} style={{ flex: 1 }}>Handled</Button>
+                  <Button variant="soft" onClick={() => st.focusStudent(alert.studentId)} style={{ flex: 1 }}>{t('Focus')}</Button>
+                  <Button variant="green" onClick={() => st.markAlertHandled(alert.id)} style={{ flex: 1 }}>{t('Handled')}</Button>
                 </div>
               </motion.div>
             ))}
@@ -132,75 +142,87 @@ export function AlertsPanel() {
 }
 
 export function StudentsGrid() {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
   const [filter, setFilter] = React.useState('all');
-  const cards = st.students.filter(s => {
-    const m = st.currentStudentMetrics[s.id] || {};
-    const status = statusFromMetrics(m);
-    if (filter === 'alerts') return st.alerts.some(a => a.studentId === s.id && a.status === 'active');
-    if (filter === 'high_stress') return m.stress > 60;
-    if (filter === 'low_attention') return m.attention < 50;
-    if (filter === 'asd') return s.classification === 'ASD';
-    if (filter === 'typical') return s.classification === 'Typical';
+  const cards = st.students.filter(student => {
+    const metrics = st.currentStudentMetrics[student.id] || {};
+    if (filter === 'alerts') return st.alerts.some(alert => alert.studentId === student.id && alert.status === 'active');
+    if (filter === 'high_stress') return metrics.stress > 60;
+    if (filter === 'low_attention') return metrics.attention < 50;
+    if (filter === 'asd') return student.classification === 'ASD';
+    if (filter === 'typical') return student.classification === 'Typical';
     return true;
   });
+
   return (
     <Card>
       <div className="section-title">
-        <h2>Students Overview</h2>
+        <h2>{t('Students Overview')}</h2>
         <div className="filters">
           {[
-            ['all', 'All'], ['alerts', 'Alerts'], ['high_stress', 'High Stress'], ['low_attention', 'Low Attention'], ['asd', 'ASD'], ['typical', 'Typical']
-          ].map(([id, label]) => <button className={`pill ${filter === id ? 'active' : ''}`} onClick={() => setFilter(id)} key={id}>{label}</button>)}
+            ['all', 'All'],
+            ['alerts', 'Alerts'],
+            ['high_stress', 'High Stress'],
+            ['low_attention', 'Low Attention'],
+            ['asd', 'ASD'],
+            ['typical', 'Typical'],
+          ].map(([id, label]) => (
+            <button className={`pill ${filter === id ? 'active' : ''}`} onClick={() => setFilter(id)} key={id}>
+              {t(label)}
+            </button>
+          ))}
         </div>
       </div>
       <motion.div layout className="grid grid-4">
         <AnimatePresence initial={false}>
-          {cards.map(s => {
-            const m = st.currentStudentMetrics[s.id] || s.baselineMetrics;
-            const status = statusFromMetrics(m);
+          {cards.map(student => {
+            const metrics = st.currentStudentMetrics[student.id] || student.baselineMetrics;
+            const status = statusFromMetrics(metrics);
             return (
-              <motion.div {...fadeItem} layout key={s.id} className={`student-card ${st.focusedStudentId === s.id ? 'focused' : ''} ${status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : ''}`} onClick={() => st.focusStudent(s.id)}>
+              <motion.div {...fadeItem} layout key={student.id} className={`student-card ${st.focusedStudentId === student.id ? 'focused' : ''} ${status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : ''}`} onClick={() => st.focusStudent(student.id)}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <div className="avatar">{s.shortName?.slice(0, 1) || s.fullName?.slice(0, 1)}</div>
-                  <div><b>{s.fullName}</b><div className="small muted">{s.classification} · {s.autismLevel}</div></div>
+                  <div className="avatar">{student.shortName?.slice(0, 1) || student.fullName?.slice(0, 1)}</div>
+                  <div><b>{student.fullName}</b><div className="small muted">{student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : t('Typical student')}</div></div>
                 </div>
-                <div className="mini-row"><span>Attention</span><b>{pct(m.attention)}</b></div>
-                <div className="mini-row"><span>Engagement</span><b>{pct(m.engagement)}</b></div>
-                <div className="mini-row"><span>Stress</span><b>{pct(m.stress)}</b></div>
-                <StatusBadge status={status}>{status}</StatusBadge>
+                <div className="mini-row"><span>{t('Attention')}</span><b>{pct(metrics.attention)}</b></div>
+                <div className="mini-row"><span>{t('Engagement')}</span><b>{pct(metrics.engagement)}</b></div>
+                <div className="mini-row"><span>{t('Stress')}</span><b>{pct(metrics.stress)}</b></div>
+                <StatusBadge status={status}>{t(status)}</StatusBadge>
               </motion.div>
             );
           })}
         </AnimatePresence>
       </motion.div>
-      <p className="small muted">Showing {cards.length} of {st.students.length} students</p>
+      <p className="small muted">{t('Showing')} {cards.length} {t('of')} {st.students.length} {t('students')}</p>
     </Card>
   );
 }
 
 export function StudentFocus() {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
-  const student = st.students.find(s => s.id === st.focusedStudentId) || st.students.find(s => s.id === st.targetStudentId) || st.students[0];
-  if (!student) return <Card><b>Student Focus</b><p className="muted">Start a session to focus on a student.</p></Card>;
-  const m = st.currentStudentMetrics[student.id] || student.baselineMetrics;
-  const data = st.metricHistory.map(p => ({ time: p.time, attention: m.attention + (Math.random() * 8 - 4), stress: m.stress + (Math.random() * 8 - 4) }));
+  const student = st.students.find(item => item.id === st.focusedStudentId) || st.students.find(item => item.id === st.targetStudentId) || st.students[0];
+  if (!student) return <Card><b>{t('Student Focus')}</b><p className="muted">{t('Start a session to focus on a student.')}</p></Card>;
+  const metrics = st.currentStudentMetrics[student.id] || student.baselineMetrics;
+  const data = st.metricHistory.map(point => ({ time: point.time, attention: metrics.attention + (Math.random() * 8 - 4), stress: metrics.stress + (Math.random() * 8 - 4) }));
+
   return (
     <motion.div layout>
       <Card>
         <div className="section-title">
-          <h2>Student Focus: {student.fullName}</h2>
-          <StatusBadge status={statusFromMetrics(m)}>{m.emotionalState || 'calm'}</StatusBadge>
+          <h2>{t('Student Focus')}: {student.fullName}</h2>
+          <StatusBadge status={statusFromMetrics(metrics)}>{t(metrics.emotionalState || 'calm')}</StatusBadge>
         </div>
         <div className="grid grid-2">
           <div>
-            <div className="mini-row"><span>Attention</span><b>{pct(m.attention)}</b></div>
-            <div className="mini-row"><span>Engagement</span><b>{pct(m.engagement)}</b></div>
-            <div className="mini-row"><span>Stress</span><b style={{ color: m.stress > 70 ? 'var(--red)' : 'inherit' }}>{pct(m.stress)}</b></div>
-            <div className="mini-row"><span>Social Interaction</span><b>{pct(m.socialInteraction)}</b></div>
-            <textarea style={{ width: '100%', marginTop: 12 }} placeholder="Add concise observation..."/>
+            <div className="mini-row"><span>{t('Attention')}</span><b>{pct(metrics.attention)}</b></div>
+            <div className="mini-row"><span>{t('Engagement')}</span><b>{pct(metrics.engagement)}</b></div>
+            <div className="mini-row"><span>{t('Stress')}</span><b style={{ color: metrics.stress > 70 ? 'var(--red)' : 'inherit' }}>{pct(metrics.stress)}</b></div>
+            <div className="mini-row"><span>{t('Social Interaction')}</span><b>{pct(metrics.socialInteraction)}</b></div>
+            <textarea style={{ width: '100%', marginTop: 12 }} placeholder={t('Add concise observation...')} />
           </div>
-          <MiniLineChart data={data}/>
+          <MiniLineChart data={data} />
         </div>
       </Card>
     </motion.div>
@@ -208,49 +230,55 @@ export function StudentFocus() {
 }
 
 export function RobotControl() {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
-  const target = st.focusedStudentId ? 'Selected Student' : 'Whole Class';
+  const hasStudentTarget = Boolean(st.focusedStudentId);
   const actions = [
     ['calm_mode', 'Calm Mode', 'soft'],
     ['praise', 'Positive Prompt', 'outline'],
     ['repeat_instruction', 'Repeat Instruction', 'soft'],
     ['change_activity', 'Change Activity', 'outline'],
-    ['group_engagement_prompt', 'Group Prompt', 'soft']
+    ['group_engagement_prompt', 'Group Prompt', 'soft'],
   ];
+
   return (
     <Card>
       <div className="section-title">
-        <h2>Robot Support Actions</h2>
-        <span className="badge green"><Bot size={13}/> {st.robotState.mode}</span>
+        <h2>{t('Robot Support Actions')}</h2>
+        <span className="badge green"><Bot size={13} /> {t(st.robotState.mode)}</span>
       </div>
-      <div className="small muted">Target</div>
+      <div className="small muted">{t('Target')}</div>
       <div className="grid grid-2" style={{ marginBottom: 12 }}>
-        <button className={`pill ${target === 'Whole Class' ? 'active' : ''}`}>Whole Class</button>
-        <button className={`pill ${target === 'Selected Student' ? 'active' : ''}`}>Selected Student</button>
+        <button className={`pill ${!hasStudentTarget ? 'active' : ''}`} onClick={() => st.focusStudent(null)}>{t('Whole Class')}</button>
+        <button className={`pill ${hasStudentTarget ? 'active' : ''}`} onClick={() => st.focusStudent(st.focusedStudentId || st.students[0]?.id || null)}>{t('Selected Student')}</button>
       </div>
       <div className="grid grid-2">
-        {actions.map(([id, label, variant]) => <Button key={id} variant={variant} onClick={() => st.runRobotAction(id, id === 'change_activity' || id === 'group_engagement_prompt' ? 'class' : 'student')}>{label}</Button>)}
+        {actions.map(([id, label, variant]) => (
+          <Button key={id} variant={variant} onClick={() => st.runRobotAction(id, id === 'change_activity' || id === 'group_engagement_prompt' ? 'class' : 'student')}>
+            {t(label)}
+          </Button>
+        ))}
       </div>
-      <Button variant="danger" onClick={() => st.runRobotAction('emergency_stop', 'class')} style={{ width: '100%', marginTop: 10 }}>Emergency Stop</Button>
-      <p className="small muted">Effect: {st.robotState.effect} · Target: {st.robotState.target}</p>
+      <Button variant="danger" onClick={() => st.runRobotAction('emergency_stop', 'class')} style={{ width: '100%', marginTop: 10 }}>{t('Emergency Stop')}</Button>
+      <p className="small muted">{t('Effect')}: {t(st.robotState.effect)} · {t('Target')}: {t(st.robotState.target)}</p>
     </Card>
   );
 }
 
 export function Timeline() {
+  const { t } = useI18n();
   const st = useLiveSessionStore();
   return (
     <Card>
-      <h2 style={{ marginTop: 0 }}>Session Timeline</h2>
+      <h2 style={{ marginTop: 0 }}>{t('Session Timeline')}</h2>
       <div className="timeline">
-        {st.timelineEvents.slice(-9).map(e => (
-          <div className="timeline-item" key={e.id}>
-            <div className="timeline-dot">{e.type === 'robot_action' ? <Bot size={16}/> : e.type === 'alert_created' ? <AlertTriangle size={16}/> : <Activity size={16}/>}</div>
-            <div><div className="small muted">{e.timestamp}</div><b>{e.title}</b><div className="small muted">{e.description}</div></div>
+        {st.timelineEvents.slice(-9).map(event => (
+          <div className="timeline-item" key={event.id}>
+            <div className="timeline-dot">{event.type === 'robot_action' ? <Bot size={16} /> : event.type === 'alert_created' ? <AlertTriangle size={16} /> : <Activity size={16} />}</div>
+            <div><div className="small muted">{event.timestamp}</div><b>{event.title}</b><div className="small muted">{event.description}</div></div>
           </div>
         ))}
       </div>
     </Card>
   );
 }
-

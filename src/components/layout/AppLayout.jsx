@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, BarChart3, BookOpen, Camera, ChevronDown, ClipboardList, Edit3, FileText, HeartPulse, Home, KeyRound, Languages, LogOut, Menu, MessageSquare, NotebookPen, Settings, Shield, UserRound, Users } from 'lucide-react';
 import logo from '../../assets/logo-horizontal.png';
-import logoIcon from '../../assets/logo-icon.png';
 import { useAuthStore } from '../../store/authStore';
 import { PageTransition } from '../ui/PageTransition';
 import { useI18n } from '../../i18n';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { GlobalSearch } from './GlobalSearch';
+import { teacherService } from '../../services/teacherService';
 
 const navs = {
   teacher: [['/teacher/dashboard', Home, 'Overview'], ['/teacher/live-session', Activity, 'Live Session'], ['/teacher/students', Users, 'Students'], ['/teacher/sessions', BookOpen, 'Sessions'], ['/teacher/analytics', BarChart3, 'Class Analytics'], ['/teacher/reports', FileText, 'Reports'], ['/teacher/notes', NotebookPen, 'Notes']],
@@ -18,6 +18,7 @@ const navs = {
 
 const titles = {
   '/teacher/dashboard': ['Teacher Overview', 'Class insights and daily actions'], '/teacher/live-session': ['Live Class Session', 'Real-time monitoring and smart support'], '/teacher/students': ['Students', 'Assigned class students'], '/teacher/sessions': ['Sessions', 'Class session history'], '/teacher/analytics': ['Class Analytics', 'Trends, comparisons and follow-up'], '/teacher/reports': ['Reports', 'Educational and session reports'], '/teacher/notes': ['Notes', 'Session and student observations'],
+  '/teacher/recommendations': ['Guidance', 'Intervention recommendations and follow-up'],
   '/doctor/dashboard': ['Doctor Overview', 'Clinical insights and priority reviews'], '/doctor/patients': ['Patients', 'Assigned students and risk indicators'], '/doctor/analytics': ['Patient Analytics', 'Behavior trends and intervention response'], '/doctor/therapy-plans': ['Therapy Plans', 'Goals, strategies and recommendations'], '/doctor/reports': ['Reports', 'Clinical and parent-safe reports'], '/doctor/recommendations': ['Recommendations', 'Guidance for teachers and parents'], '/doctor/timeline': ['Behavior Timeline', 'Chronological behavioral events'],
   '/parent/dashboard': ['Parent Overview', 'Simple progress and live child status'], '/parent/progress': ['Child Progress', 'Friendly trends and achievements'], '/parent/reports': ['Reports', 'Parent-safe progress reports'], '/parent/recommendations': ['Recommendations', 'Home guidance and support'], '/parent/sessions': ['Session Summaries', 'Your child activity summaries'], '/parent/messages': ['Messages', 'Communication placeholder'],
   '/profile': ['Profile', 'Personal profile and professional account details.'], '/settings/account': ['Account Settings', 'Manage identity, preferences, and access settings.'], '/settings/security': ['Security', 'Update password and security preferences.'], '/notifications': ['Notifications', 'Review system alerts, session events, reports, and clinical updates.'],
@@ -35,9 +36,13 @@ export function AppLayout() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [sidebarInsight, setSidebarInsight] = useState(null);
   const menuRef = useRef(null);
   const role = user?.role || 'teacher';
-  const title = titles[loc.pathname] || titles['/' + role + '/dashboard'];
+  const title = titles[loc.pathname]
+    || (loc.pathname.startsWith('/teacher/students/') ? ['Students', 'Assigned class students'] : null)
+    || (loc.pathname.startsWith('/teacher/sessions/') ? ['Sessions', 'Class session history'] : null)
+    || titles['/' + role + '/dashboard'];
   const avatar = user?.avatarUrl || user?.avatar;
   const initials = initialsFor(user?.fullName);
 
@@ -60,6 +65,20 @@ export function AppLayout() {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (role !== 'teacher' || !user?.id) {
+      setSidebarInsight(null);
+      return;
+    }
+    teacherService.getSidebarInsight(user.id).then(insight => {
+      if (!cancelled) setSidebarInsight(insight);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [role, user?.id, loc.pathname]);
 
   const profileActions = [
     ['/profile', UserRound, 'View Profile'],
@@ -86,10 +105,9 @@ export function AppLayout() {
           ))}
         </nav>
         <div className="sidebar-tip">
-          <h4>{t(role === 'teacher' ? 'Intervention Insight' : role === 'doctor' ? 'Clinical Focus' : 'SWAYA supports you')}</h4>
-          <p>{t(role === 'teacher' ? 'Use early interventions when stress begins to rise.' : role === 'doctor' ? 'Review behavior trends before updating therapy plans.' : 'Your child is supported with role-based insight.')}</p>
-          <button className="sidebar-guidance" onClick={() => nav(role === 'teacher' ? '/teacher/notes' : role === 'doctor' ? '/doctor/recommendations' : '/parent/recommendations')}>{t('View guidance')}</button>
-          <img src={logoIcon} alt="SWAYA icon"/>
+          <h4>{t(role === 'teacher' ? sidebarInsight?.title || 'Intervention Insight' : role === 'doctor' ? 'Clinical Focus' : 'SWAYA supports you')}</h4>
+          <p>{t(role === 'teacher' ? sidebarInsight?.description || 'Use early interventions when stress begins to rise.' : role === 'doctor' ? 'Review behavior trends before updating therapy plans.' : 'Your child is supported with role-based insight.')}</p>
+          <button className="sidebar-guidance" onClick={() => nav(role === 'teacher' ? sidebarInsight?.href || '/teacher/recommendations' : role === 'doctor' ? '/doctor/recommendations' : '/parent/recommendations')}>{t('View guidance')}</button>
         </div>
         <div className="sidebar-foot">SWAYA v1.0.0<br/>{t('Beta build')}</div>
       </aside>

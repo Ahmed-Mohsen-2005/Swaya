@@ -31,7 +31,10 @@ export function GlobalSearch({ className = '' }) {
         setOpen(true);
       });
     }, 120);
-    return () => { cancelled = true; clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [query, user?.role]);
 
   useEffect(() => {
@@ -75,8 +78,15 @@ export function GlobalSearch({ className = '' }) {
   return (
     <div className={`global-search-wrap ${className}`} ref={wrapRef}>
       <label className="search-input">
-        <Search size={16}/>
-        <input value={query} onChange={event => setQuery(event.target.value)} onFocus={() => query && setOpen(true)} onKeyDown={onKeyDown} placeholder={t('Search students, sessions, reports…')} aria-label={t('Search students, sessions, reports…')}/>
+        <Search size={16} />
+        <input
+          value={query}
+          onChange={event => setQuery(event.target.value)}
+          onFocus={() => query && setOpen(true)}
+          onKeyDown={onKeyDown}
+          placeholder={t('Search students, sessions, reports…')}
+          aria-label={t('Search students, sessions, reports…')}
+        />
       </label>
       <AnimatePresence>
         {open && (
@@ -87,7 +97,12 @@ export function GlobalSearch({ className = '' }) {
                 {items.map(item => {
                   runningIndex += 1;
                   const itemIndex = runningIndex;
-                  return <button className={itemIndex === active ? 'active' : ''} role="option" aria-selected={itemIndex === active} key={`${item.href}-${item.title}`} onMouseEnter={() => setActive(itemIndex)} onClick={() => go(item)}><b>{t(item.title)}</b><span>{t(item.description)}</span></button>;
+                  return (
+                    <button className={itemIndex === active ? 'active' : ''} role="option" aria-selected={itemIndex === active} key={`${item.href}-${item.title}`} onMouseEnter={() => setActive(itemIndex)} onClick={() => go(item)}>
+                      <b>{t(item.title)}</b>
+                      <span>{t(item.description)}</span>
+                    </button>
+                  );
                 })}
               </div>
             ))}

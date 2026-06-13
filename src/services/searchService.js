@@ -19,10 +19,11 @@ export const searchService = {
     reports.forEach(report => add('Reports', report.title, report.summary, role === 'parent' ? '/parent/reports' : role === 'doctor' ? '/doctor/reports' : '/teacher/reports', report.status));
     notes.forEach(note => add('Notes', note.content, note.authorRole, role === 'teacher' ? '/teacher/notes' : '/doctor/timeline', note.importance));
     alerts.forEach(alert => add('Alerts', alert.message, `${alert.studentName} · ${alert.severity}`, role === 'doctor' ? `/doctor/patients/${alert.studentId}` : `/teacher/students/${alert.studentId}`, alert.type));
-    recommendations.forEach(rec => add('Recommendations', rec.title, rec.description, role === 'parent' ? '/parent/recommendations' : role === 'doctor' ? '/doctor/recommendations' : `/teacher/students/${rec.studentId}`, rec.category));
+    recommendations.forEach(rec => add('Recommendations', rec.title, rec.description, role === 'parent' ? '/parent/recommendations' : role === 'doctor' ? '/doctor/recommendations' : '/teacher/recommendations', rec.category));
     [
       ['Pages', 'Dashboard', 'Role overview', role === 'doctor' ? '/doctor/dashboard' : role === 'parent' ? '/parent/dashboard' : '/teacher/dashboard'],
       ['Pages', 'Analytics', 'Trends and comparisons', role === 'doctor' ? '/doctor/analytics' : role === 'parent' ? '/parent/progress' : '/teacher/analytics'],
+      ['Pages', 'Guidance', 'Intervention recommendations and follow-up', role === 'teacher' ? '/teacher/recommendations' : role === 'doctor' ? '/doctor/recommendations' : '/parent/recommendations'],
       ['Pages', 'Notifications', 'System updates and alerts', '/notifications'],
     ].forEach(item => add(...item));
 

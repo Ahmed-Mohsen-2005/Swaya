@@ -1,24 +1,119 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { dataService } from '../../services/dataService';
-import { Card } from '../../components/ui/Card';
-import { StatusBadge } from '../../components/ui/StatusBadge';
-import { DataTable } from '../../components/ui/DataTable';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, BarChart3, Clock3, Search } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+import { teacherService } from '../../services/teacherService';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { LoadingState, EmptyState } from '../../components/ui/StateViews';
+import { MetricCard } from '../../components/ui/MetricCard';
 import { FilterTabs } from '../../components/ui/FilterTabs';
+import { DataTable } from '../../components/ui/DataTable';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { SearchInput } from '../../components/ui/SearchInput';
 import { useI18n } from '../../i18n';
+import { Button } from '../../components/ui/Button';
+import { Card } from '../../components/ui/Card';
 
 export default function TeacherSessions() {
   const { t } = useI18n();
-  const [sessions, setSessions] = useState([]);
-  useEffect(() => { dataService.getSessions().then(setSessions); }, []);
+  const { user } = useAuthStore();
+  const nav = useNavigate();
+  const [page, setPage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    teacherService.getSessionsPage(user.id).then(data => {
+      if (cancelled) return;
+      setPage(data);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.id]);
+
+  const rows = useMemo(() => {
+    if (!page) return [];
+    return page.sessions.filter(session => {
+      const matchesFilter = filter === 'all'
+        || (filter === 'stress' ? session.avgStress >= 35 : session.date >= '2026-05-22');
+      const haystack = `${session.title} ${session.statusLabel} ${session.dateLabel}`.toLowerCase();
+      const matchesQuery = !query.trim() || haystack.includes(query.trim().toLowerCase());
+      return matchesFilter && matchesQuery;
+    });
+  }, [page, filter, query]);
+
+  if (loading && !page) return <LoadingState />;
+  if (!page) return <EmptyState title="No data yet" description="Content will appear here when available." />;
+
   const columns = [
-    { key: 'title', header: 'Session', render: s => <Link to={`/teacher/sessions/${s.id}`}><b>{s.title}</b></Link> },
-    { key: 'date', header: 'Date' },
-    { key: 'durationMinutes', header: 'Duration', render: s => `${s.durationMinutes} min` },
-    { key: 'avgAttention', header: 'Attention', render: s => `${s.avgAttention}%` },
-    { key: 'avgEngagement', header: 'Engagement', render: s => `${s.avgEngagement}%` },
-    { key: 'avgStress', header: 'Stress', render: s => `${s.avgStress}%` },
-    { key: 'alerts', header: 'Alerts', render: s => <StatusBadge status={s.alerts > 2 ? 'warning' : 'stable'}>{s.alerts}</StatusBadge> },
+    { key: 'title', header: 'Session title', render: session => <b>{session.title}</b> },
+    { key: 'dateTimeLabel', header: 'Date/time' },
+    { key: 'durationLabel', header: 'Duration' },
+    { key: 'avgAttention', header: 'Attention', render: session => `${session.avgAttention}%` },
+    { key: 'avgEngagement', header: 'Engagement', render: session => `${session.avgEngagement}%` },
+    { key: 'avgStress', header: 'Stress', render: session => `${session.avgStress}%` },
+    { key: 'alertsCount', header: 'Alerts count', render: session => <StatusBadge status={session.alertsCount >= 3 ? 'warning' : 'stable'}>{session.alertsCount}</StatusBadge> },
+    { key: 'statusLabel', header: 'Status', render: session => <StatusBadge status={session.statusTone}>{session.statusLabel}</StatusBadge> },
+    {
+      key: 'actions',
+      header: 'Action',
+      render: session => (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={event => {
+            event.stopPropagation();
+            nav(`/teacher/sessions/${session.id}`);
+          }}
+        >
+          {t('View Details')}
+        </Button>
+      ),
+    },
   ];
-  return <Card><div className="section-title"><h2>{t('Class Sessions')}</h2><FilterTabs items={[['all','All'],['stress','High Stress'],['week','This Week']]} active="all"/></div><DataTable columns={columns} rows={sessions}/></Card>;
+
+  return (
+    <div className="grid teacher-module-page">
+      <PageHeader title="Class Sessions" subtitle="Review monitored classroom sessions, attention trends, alerts, and follow-up actions." meta={{ label: 'Last updated', value: 'just now' }} />
+
+      <div className="grid grid-4">
+        {page.summary.map(item => (
+          <MetricCard
+            key={item.label}
+            icon={item.label === 'Total sessions' ? <BarChart3 /> : item.label === 'Average duration' ? <Clock3 /> : item.label === 'Alerts this week' ? <AlertTriangle /> : <Search />}
+            label={item.label}
+            value={item.value}
+            trend={item.trend}
+            color={item.label === 'Alerts this week' ? 'orange' : 'blue'}
+          />
+        ))}
+      </div>
+
+      <Card>
+        <div className="teacher-section-head">
+          <div>
+            <h2>{t('Class Sessions')}</h2>
+            <p className="small muted">{t('Live classroom sessions and follow-up review')}</p>
+          </div>
+          <div className="teacher-section-actions">
+            <FilterTabs items={[['all', 'All'], ['stress', 'High Stress'], ['week', 'This Week']]} active={filter} onChange={setFilter} />
+            <SearchInput value={query} onChange={event => setQuery(event.target.value)} placeholder="Search students, sessions, reports..." className="teacher-inline-search" />
+          </div>
+        </div>
+
+        <DataTable
+          columns={columns}
+          rows={rows}
+          onRowClick={session => nav(`/teacher/sessions/${session.id}`)}
+          emptyTitle="No results found"
+          emptyDescription="Try a different session filter or search query."
+        />
+      </Card>
+    </div>
+  );
 }
