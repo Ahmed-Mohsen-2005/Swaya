@@ -10,9 +10,10 @@ import { FilterTabs } from '../../components/ui/FilterTabs';
 import { SearchInput } from '../../components/ui/SearchInput';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { StatusBadge } from '../../components/ui/StatusBadge';
+import { displayName, initialsForEntity } from '../../utils/localization';
 
 export default function TeacherStudents() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export default function TeacherStudents() {
     if (!page) return [];
     return page.students.filter(student => {
       const matchesFilter = filter === 'all' || (filter === 'asd' ? student.classification === 'ASD' : student.classification === 'Typical');
-      const haystack = `${student.fullName} ${student.shortName} ${student.statusLabel} ${student.classification} ${student.autismLevel}`.toLowerCase();
+      const haystack = `${student.fullName} ${displayName(student, 'ar')} ${student.shortName} ${student.statusLabel} ${student.classification} ${student.autismLevel}`.toLowerCase();
       const matchesQuery = !query.trim() || haystack.includes(query.trim().toLowerCase());
       return matchesFilter && matchesQuery;
     });
@@ -83,10 +84,10 @@ export default function TeacherStudents() {
             {filteredStudents.map(student => (
               <Link to={`/teacher/students/${student.id}`} className="teacher-student-monitor-card" key={student.id}>
                 <div className="teacher-student-card-head">
-                  <span className="avatar teacher-avatar">{student.initials}</span>
+                  <span className="avatar teacher-avatar">{initialsForEntity(student, language)}</span>
                   <div>
-                    <h3>{student.fullName}</h3>
-                    <p>{student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : t('Typical student')}</p>
+                    <h3>{displayName(student, language)}</h3>
+                    <p>{student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : `${t('Typical')} · ${t('Not applicable')}`}</p>
                   </div>
                   <StatusBadge status={student.statusTone}>{student.statusLabel}</StatusBadge>
                 </div>
@@ -98,7 +99,7 @@ export default function TeacherStudents() {
                 </div>
 
                 <div className="teacher-student-card-foot">
-                  <span>{t('Last session')}: {student.lastSessionLabel}</span>
+                  <span>{t('Last session')}: {t(student.lastSessionLabel)}</span>
                   <span className="teacher-link-chip">{t('View Profile')}</span>
                 </div>
               </Link>

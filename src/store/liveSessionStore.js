@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { initializeMetrics, nextMetrics, calculateClassMetrics, createAlerts, robotEffectFor } from '../simulation/simulationEngine';
-const nowTime = () => new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+const nowTime = () => new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit', hour12:false});
 const timeline = (type,title,description,studentId) => ({ id:`evt_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, type, title, description, studentId, timestamp:nowTime() });
 let intervalRef = null;
 export const useLiveSessionStore = create((set,get)=>({

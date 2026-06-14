@@ -12,9 +12,10 @@ import { Card } from '../../components/ui/Card';
 import { DataTable } from '../../components/ui/DataTable';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useI18n } from '../../i18n';
+import { displayName } from '../../utils/localization';
 
 export default function TeacherStudentProfile() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const { studentId } = useParams();
   const [page, setPage] = useState(null);
@@ -38,7 +39,7 @@ export default function TeacherStudentProfile() {
 
   const { student, classRoom, sessions, alerts, notes, recommendations, trend } = page;
   const sessionColumns = [
-    { key: 'title', header: 'Session', render: item => <Link to={`/teacher/sessions/${item.id}`}><b>{item.title}</b></Link> },
+    { key: 'title', header: 'Session', render: item => <Link to={`/teacher/sessions/${item.id}`}><b>{t(item.title)}</b></Link> },
     { key: 'dateLabel', header: 'Date' },
     { key: 'durationLabel', header: 'Duration' },
     { key: 'statusLabel', header: 'Status', render: item => <StatusBadge status={item.statusTone}>{item.statusLabel}</StatusBadge> },
@@ -47,8 +48,8 @@ export default function TeacherStudentProfile() {
   return (
     <div className="grid teacher-module-page">
       <PageHeader
-        title={student.fullName}
-        subtitle={`${student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : t('Typical student')} · ${classRoom?.name || 'Inclusive Class A'}`}
+        title={displayName(student, language)}
+        subtitle={`${student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : `${t('Typical')} · ${t('Not applicable')}`} · ${t(classRoom?.name || 'Inclusive Class A')}`}
         meta={{ label: 'Support level', value: student.statusLabel }}
         badge={student.activeAlertsCount ? `${student.activeAlertsCount} ${t('Recent alerts')}` : t('Stable class')}
       />
@@ -71,7 +72,7 @@ export default function TeacherStudentProfile() {
           </div>
           <div className="teacher-profile-facts">
             <div className="teacher-inline-metric"><span>{t('Role')}</span><b>{t('teacher')}</b></div>
-            <div className="teacher-inline-metric"><span>{t('Class')}</span><b>{classRoom?.name || 'Inclusive Class A'}</b></div>
+            <div className="teacher-inline-metric"><span>{t('Class')}</span><b>{t(classRoom?.name || 'Inclusive Class A')}</b></div>
             <div className="teacher-inline-metric"><span>{t('Assigned Students')}</span><b>{classRoom?.studentIds?.length || 0}</b></div>
             <div className="teacher-inline-metric"><span>{t('Current status')}</span><b>{t(student.statusLabel)}</b></div>
           </div>
@@ -81,7 +82,7 @@ export default function TeacherStudentProfile() {
               {alerts.length ? alerts.slice(0, 3).map(alert => (
                 <div key={alert.id} className="teacher-list-row">
                   <div>
-                    <strong>{alert.message}</strong>
+                    <strong>{t(alert.message)}</strong>
                     <span>{alert.createdAt.slice(0, 10)}</span>
                   </div>
                   <StatusBadge status={alert.severity}>{alert.severity}</StatusBadge>
@@ -123,9 +124,9 @@ export default function TeacherStudentProfile() {
                     <StatusBadge status={note.severityTone}>{note.severity}</StatusBadge>
                     <StatusBadge status="blue">{note.category}</StatusBadge>
                   </div>
-                  <span>{note.timestampLabel}</span>
+                  <span>{t(note.timestampLabel)}</span>
                 </div>
-                <p>{note.content}</p>
+                <p>{t(note.content)}</p>
               </div>
             )) : <EmptyState title="No data yet" description="Notes will appear here when available." />}
           </div>
@@ -143,8 +144,8 @@ export default function TeacherStudentProfile() {
           {recommendations.length ? recommendations.map(rec => (
             <div key={rec.id} className="teacher-recommendation-card">
               <StatusBadge status="blue">{rec.statusLabel}</StatusBadge>
-              <h3>{rec.title}</h3>
-              <p>{rec.description}</p>
+              <h3>{t(rec.title)}</h3>
+              <p>{t(rec.description)}</p>
             </div>
           )) : <EmptyState title="No data yet" description="Recommendations will appear here when available." />}
         </div>

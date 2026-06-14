@@ -11,9 +11,10 @@ import { StudentsBarChart, LiveLineChart } from '../../components/charts/SimpleC
 import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { useI18n } from '../../i18n';
+import { displayName } from '../../utils/localization';
 
 export default function TeacherAnalytics() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -116,7 +117,7 @@ export default function TeacherAnalytics() {
             {page.improvingStudents.map(student => (
               <div key={student.id} className="teacher-list-row">
                 <div>
-                  <strong>{student.fullName}</strong>
+                  <strong>{displayName(student, language)}</strong>
                   <span>{student.metrics.engagement}% {t('Engagement')}</span>
                 </div>
                 <StatusBadge status="stable">{student.statusLabel}</StatusBadge>
@@ -136,7 +137,7 @@ export default function TeacherAnalytics() {
             {page.followUpStudents.length ? page.followUpStudents.map(student => (
               <div key={student.id} className="teacher-list-row">
                 <div>
-                  <strong>{student.fullName}</strong>
+                  <strong>{displayName(student, language)}</strong>
                   <span>{student.metrics.stress}% {t('Stress')}</span>
                 </div>
                 <StatusBadge status={student.statusTone}>{student.statusLabel}</StatusBadge>

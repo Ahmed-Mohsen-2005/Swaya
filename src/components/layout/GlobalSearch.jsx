@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 import { searchService } from '../../services/searchService';
 
 export function GlobalSearch({ className = '' }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const nav = useNavigate();
   const wrapRef = useRef(null);
@@ -24,7 +24,7 @@ export function GlobalSearch({ className = '' }) {
         setOpen(false);
         return;
       }
-      searchService.search(query, user?.role).then(items => {
+      searchService.search(query, user?.role, language).then(items => {
         if (cancelled) return;
         setResults(items);
         setActive(0);
@@ -35,7 +35,7 @@ export function GlobalSearch({ className = '' }) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query, user?.role]);
+  }, [query, user?.role, language]);
 
   useEffect(() => {
     function onPointerDown(event) {
@@ -84,8 +84,8 @@ export function GlobalSearch({ className = '' }) {
           onChange={event => setQuery(event.target.value)}
           onFocus={() => query && setOpen(true)}
           onKeyDown={onKeyDown}
-          placeholder={t('Search students, sessions, reports…')}
-          aria-label={t('Search students, sessions, reports…')}
+          placeholder={t('Search students, sessions, reports...')}
+          aria-label={t('Search students, sessions, reports...')}
         />
       </label>
       <AnimatePresence>

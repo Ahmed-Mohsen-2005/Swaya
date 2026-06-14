@@ -14,9 +14,10 @@ import { teacherService } from '../../services/teacherService';
 import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { FilterTabs } from '../../components/ui/FilterTabs';
+import { displayName, initialsForEntity } from '../../utils/localization';
 
 export default function TeacherDashboard() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const [dashboard, setDashboard] = useState(null);
   const [period, setPeriod] = useState('today');
@@ -86,10 +87,10 @@ export default function TeacherDashboard() {
             {priorityStudents.map(student => (
               <Link to={`/teacher/students/${student.id}`} className="priority-row" key={student.id}>
                 <div className="priority-person">
-                  <span className="avatar">{student.initials}</span>
+                  <span className="avatar">{initialsForEntity(student, language)}</span>
                   <div>
-                    <b>{student.fullName}</b>
-                    <p>{t(student.classification)} · {student.autismLevel === 'not_applicable' ? t('Typical') : t(student.autismLevel)}</p>
+                    <b>{displayName(student, language)}</b>
+                    <p>{t(student.classification)} · {student.autismLevel === 'not_applicable' ? t('Not applicable') : t(student.autismLevel)}</p>
                   </div>
                 </div>
                 <StatusBadge status={student.statusTone}>{student.statusLabel}</StatusBadge>
@@ -98,7 +99,7 @@ export default function TeacherDashboard() {
                   <span><Activity size={13} />{student.metrics.engagement}%</span>
                   <span><HeartPulse size={13} />{student.metrics.stress}%</span>
                 </div>
-                <span className="priority-time">{student.lastSessionRelative}</span>
+                <span className="priority-time">{t(student.lastSessionRelative)}</span>
                 <span className="priority-action">{t('View Profile')}</span>
               </Link>
             ))}

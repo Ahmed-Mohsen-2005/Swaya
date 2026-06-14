@@ -11,6 +11,7 @@ import { Card } from '../../components/ui/Card';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Button } from '../../components/ui/Button';
 import { useI18n } from '../../i18n';
+import { displayName } from '../../utils/localization';
 
 const emptyForm = {
   studentId: '',
@@ -21,7 +22,7 @@ const emptyForm = {
 };
 
 export default function TeacherNotes() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +56,8 @@ export default function TeacherNotes() {
     if (!page) return [];
     return notes.filter(note => {
       const matchesFilter = filter === 'all' || note.severity.toLowerCase() === filter;
-      const studentName = page.students.find(item => item.id === note.studentId)?.fullName || '';
+      const student = page.students.find(item => item.id === note.studentId);
+      const studentName = `${displayName(student, 'en')} ${displayName(student, 'ar')}`;
       const haystack = `${note.content} ${studentName} ${note.category} ${note.author}`.toLowerCase();
       const matchesQuery = !query.trim() || haystack.includes(query.trim().toLowerCase());
       return matchesFilter && matchesQuery;
@@ -91,7 +93,7 @@ export default function TeacherNotes() {
       severityTone: form.severity === 'High' ? 'critical' : form.severity === 'Medium' ? 'warning' : 'stable',
       category: form.category,
       content: form.text.trim(),
-      timestampLabel: new Date().toLocaleString(),
+      timestampLabel: new Date().toISOString(),
       createdAt: new Date().toISOString(),
     };
     setNotes(current => editingId ? current.map(note => note.id === editingId ? payload : note) : [payload, ...current]);
@@ -146,13 +148,13 @@ export default function TeacherNotes() {
               <label>
                 <span>{t('Students')}</span>
                 <select className="select" value={form.studentId} onChange={event => setForm(current => ({ ...current, studentId: event.target.value }))}>
-                  {page.students.map(student => <option key={student.id} value={student.id}>{student.fullName}</option>)}
+                  {page.students.map(student => <option key={student.id} value={student.id}>{displayName(student, language)}</option>)}
                 </select>
               </label>
               <label>
                 <span>{t('Sessions')}</span>
                 <select className="select" value={form.sessionId} onChange={event => setForm(current => ({ ...current, sessionId: event.target.value }))}>
-                  {page.sessions.map(session => <option key={session.id} value={session.id}>{session.title}</option>)}
+                  {page.sessions.map(session => <option key={session.id} value={session.id}>{t(session.title)}</option>)}
                 </select>
               </label>
             </div>
@@ -201,10 +203,10 @@ export default function TeacherNotes() {
                   <StatusBadge status={selectedNote.severityTone || (selectedNote.severity === 'High' ? 'critical' : selectedNote.severity === 'Medium' ? 'warning' : 'stable')}>{selectedNote.severity}</StatusBadge>
                   <StatusBadge status="blue">{selectedNote.category}</StatusBadge>
                 </div>
-                <span>{selectedNote.timestampLabel}</span>
+                <span>{t(selectedNote.timestampLabel)}</span>
               </div>
-              <b>{page.students.find(item => item.id === selectedNote.studentId)?.fullName || t('Assigned Students')}</b>
-              <p>{selectedNote.content}</p>
+              <b>{displayName(page.students.find(item => item.id === selectedNote.studentId), language) || t('Assigned Students')}</b>
+              <p>{t(selectedNote.content)}</p>
             </div>
           )}
           <div className="teacher-section-actions teacher-section-actions-block">
@@ -222,12 +224,12 @@ export default function TeacherNotes() {
                       <StatusBadge status={note.severityTone || (note.severity === 'High' ? 'critical' : note.severity === 'Medium' ? 'warning' : 'stable')}>{note.severity}</StatusBadge>
                       <StatusBadge status="blue">{note.category}</StatusBadge>
                     </div>
-                    <span>{note.timestampLabel}</span>
+                    <span>{t(note.timestampLabel)}</span>
                   </div>
-                  <b>{student?.fullName || t('Assigned Students')}</b>
-                  <p>{note.content}</p>
+                  <b>{displayName(student, language) || t('Assigned Students')}</b>
+                  <p>{t(note.content)}</p>
                   <div className="teacher-note-meta">
-                    <span>{note.author}</span>
+                    <span>{t(note.author)}</span>
                   </div>
                   <div className="teacher-action-row">
                     <Button variant="outline" size="sm" onClick={() => { setSelectedNoteId(note.id); setFeedback(''); }}>{t('View')}</Button>

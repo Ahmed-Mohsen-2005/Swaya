@@ -2,6 +2,7 @@ import { Card } from './Card';
 import { useI18n } from '../../i18n';
 export function MetricCard({icon, label, value, trend, color='blue', status}){
   const {t}=useI18n();
+  const displayValue = typeof value === 'string' ? t(value) : value;
   const trendText = String(trend || '').trim().toLowerCase();
   const trendClass =
     trendText.includes('critical') || trendText.includes('urgent') || trendText.includes('high risk')
@@ -15,7 +16,7 @@ export function MetricCard({icon, label, value, trend, color='blue', status}){
           : 'info';
   return <Card className={`metric-card metric-${color}`}>
     <div className="metric-head"><span className="metric-icon">{icon}</span><div><div className="small muted">{t(label)}</div>{status && <b>{t(status)}</b>}</div></div>
-    <div className="metric-value-row"><div className="metric-value">{value}</div>{trend && <span className={`trend-chip ${trendClass}`}>{t(trend)}</span>}</div>
+    <div className="metric-value-row"><div className="metric-value">{displayValue}</div>{trend && <span className={`trend-chip ${trendClass}`}>{t(trend)}</span>}</div>
     <div className="metric-spark"><span style={{width: value && String(value).includes('%') ? value : '62%'}}/></div>
   </Card>
 }

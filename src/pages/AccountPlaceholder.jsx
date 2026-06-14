@@ -2,6 +2,7 @@ import { Shield, UserRound } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { useAuthStore } from '../store/authStore';
 import { useI18n } from '../i18n';
+import { initialsForEntity } from '../utils/localization';
 
 const copy = {
   profile: ['Profile', 'Personal profile and professional account details.', 'Avatar and identity controls will connect to the production profile service.'],
@@ -11,9 +12,9 @@ const copy = {
 
 export function AccountPlaceholder({ type }) {
   const { user } = useAuthStore();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [title, subtitle, body] = copy[type] || copy.profile;
-  const initials = user?.fullName?.split(' ').map(part => part[0]).slice(0, 2).join('') || 'SW';
+  const initials = initialsForEntity(user, language);
 
   return (
     <div className="grid">

@@ -21,7 +21,10 @@ export function DataTable({ columns, rows, getKey, onRowClick, getRowClassName, 
               className={`${onRowClick ? 'table-row-clickable' : ''} ${getRowClassName?.(row) || ''}`.trim()}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
-              {columns.map(column => <td key={column.key}>{column.render ? column.render(row) : row[column.key]}</td>)}
+              {columns.map(column => {
+                const value = column.render ? column.render(row) : row[column.key];
+                return <td key={column.key}>{typeof value === 'string' ? t(value) : value}</td>;
+              })}
             </tr>
           ))}
         </tbody>

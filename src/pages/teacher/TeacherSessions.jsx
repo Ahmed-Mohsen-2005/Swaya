@@ -51,7 +51,7 @@ export default function TeacherSessions() {
   if (!page) return <EmptyState title="No data yet" description="Content will appear here when available." />;
 
   const columns = [
-    { key: 'title', header: 'Session title', render: session => <b>{session.title}</b> },
+    { key: 'title', header: 'Session title', render: session => <b>{t(session.title)}</b> },
     { key: 'dateTimeLabel', header: 'Date/time' },
     { key: 'durationLabel', header: 'Duration' },
     { key: 'avgAttention', header: 'Attention', render: session => `${session.avgAttention}%` },

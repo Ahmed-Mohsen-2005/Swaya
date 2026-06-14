@@ -67,7 +67,7 @@ export default function TeacherReports() {
 
       <div className="grid grid-4">
         {page.summary.map(item => (
-          <MetricCard key={item.label} icon={<FileText />} label={item.label} value={item.value} trend={item.trend} color={item.label === 'Pending review' ? 'orange' : 'blue'} />
+          <MetricCard key={item.label} icon={<FileText />} label={item.label} value={item.value} trend={item.trend} color={item.status === 'warning' ? 'orange' : 'blue'} />
         ))}
       </div>
 
@@ -89,15 +89,15 @@ export default function TeacherReports() {
               <div key={report.id} className={`teacher-report-card ${selectedReport?.id === report.id ? 'active' : ''}`}>
                 <div className="teacher-report-card-head">
                   <div>
-                    <h3>{report.title}</h3>
-                    <p>{report.relatedLabel} · {report.dateLabel}</p>
+                    <h3>{t(report.title)}</h3>
+                    <p>{t(report.relatedLabel)} · {t(report.dateLabel)}</p>
                   </div>
                   <StatusBadge status={report.statusTone}>{report.statusLabel}</StatusBadge>
                 </div>
                 <div className="teacher-note-badges">
                   <StatusBadge status="blue">{report.reportTypeLabel}</StatusBadge>
                 </div>
-                <p>{report.summary}</p>
+                <p>{t(report.summary)}</p>
                 <div className="teacher-action-row">
                   <Button variant="outline" size="sm" onClick={() => { setSelectedReportId(report.id); setActionNote(''); }}><Eye size={14} />{t('View')}</Button>
                   <Button variant="outline" size="sm" onClick={() => setActionNote(t('Download prepared for selected report.'))}><Download size={14} />{t('Download')}</Button>
@@ -112,7 +112,7 @@ export default function TeacherReports() {
           <div className="teacher-section-head compact">
             <div>
               <h2>{t('Report preview')}</h2>
-              <p className="small muted">{selectedReport ? selectedReport.dateTimeLabel : t('Select a report to review.')}</p>
+              <p className="small muted">{selectedReport ? t(selectedReport.dateTimeLabel) : t('Select a report to review.')}</p>
             </div>
             {selectedReport && <StatusBadge status={selectedReport.statusTone}>{selectedReport.statusLabel}</StatusBadge>}
           </div>
@@ -120,12 +120,12 @@ export default function TeacherReports() {
           {selectedReport ? (
             <div className="teacher-card-stack">
               <div className="teacher-surface-list">
-                <b>{selectedReport.title}</b>
-                <p>{selectedReport.summary}</p>
+                <b>{t(selectedReport.title)}</b>
+                <p>{t(selectedReport.summary)}</p>
               </div>
-              <div className="teacher-inline-metric"><span>{t('Report type')}</span><b>{selectedReport.reportTypeLabel}</b></div>
-              <div className="teacher-inline-metric"><span>{t('Related class/student/session')}</span><b>{selectedReport.relatedLabel}</b></div>
-              <div className="teacher-inline-metric"><span>{t('Date generated')}</span><b>{selectedReport.dateLabel}</b></div>
+              <div className="teacher-inline-metric"><span>{t('Report type')}</span><b>{t(selectedReport.reportTypeLabel)}</b></div>
+              <div className="teacher-inline-metric"><span>{t('Related class/student/session')}</span><b>{t(selectedReport.relatedLabel)}</b></div>
+              <div className="teacher-inline-metric"><span>{t('Date generated')}</span><b>{t(selectedReport.dateLabel)}</b></div>
               <div className="teacher-action-row">
                 <Button size="sm" onClick={() => setActionNote(t('Share dialog opened for selected report.'))}><Send size={14} />{t('Share')}</Button>
                 <Button variant="outline" size="sm" onClick={() => setActionNote(t('Download prepared for selected report.'))}><Download size={14} />{t('Download')}</Button>

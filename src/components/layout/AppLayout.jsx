@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Activity, BarChart3, BookOpen, Camera, ChevronDown, ClipboardList, Edit3, FileText, HeartPulse, Home, KeyRound, Languages, LogOut, Menu, MessageSquare, NotebookPen, Settings, Shield, UserRound, Users } from 'lucide-react';
+import { Activity, BarChart3, BookOpen, Camera, ChevronDown, ClipboardList, Edit3, FileText, HeartPulse, Home, KeyRound, Languages, LogOut, Menu, MessageSquare, NotebookPen, Search, Settings, Shield, UserRound, Users } from 'lucide-react';
 import logo from '../../assets/logo-horizontal.png';
 import { useAuthStore } from '../../store/authStore';
 import { PageTransition } from '../ui/PageTransition';
@@ -9,6 +9,8 @@ import { useI18n } from '../../i18n';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { GlobalSearch } from './GlobalSearch';
 import { teacherService } from '../../services/teacherService';
+import { dashboardService } from '../../services/dashboardService';
+import { displayName, initialsForEntity } from '../../utils/localization';
 
 const navs = {
   teacher: [['/teacher/dashboard', Home, 'Overview'], ['/teacher/live-session', Activity, 'Live Session'], ['/teacher/students', Users, 'Students'], ['/teacher/sessions', BookOpen, 'Sessions'], ['/teacher/analytics', BarChart3, 'Class Analytics'], ['/teacher/reports', FileText, 'Reports'], ['/teacher/notes', NotebookPen, 'Notes']],
@@ -24,19 +26,17 @@ const titles = {
   '/profile': ['Profile', 'Personal profile and professional account details.'], '/settings/account': ['Account Settings', 'Manage identity, preferences, and access settings.'], '/settings/security': ['Security', 'Update password and security preferences.'], '/notifications': ['Notifications', 'Review system alerts, session events, reports, and clinical updates.'],
 };
 
-function initialsFor(name) {
-  return name?.split(' ').filter(Boolean).map(part => part[0]).slice(0, 2).join('').toUpperCase() || 'SW';
-}
-
 export function AppLayout() {
   const { user, logout } = useAuthStore();
   const nav = useNavigate();
   const loc = useLocation();
-  const { t, dir, isArabic, toggleLanguage } = useI18n();
+  const { t, dir, isArabic, language, toggleLanguage } = useI18n();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [sidebarInsight, setSidebarInsight] = useState(null);
+  const [doctorFocus, setDoctorFocus] = useState(null);
   const menuRef = useRef(null);
   const role = user?.role || 'teacher';
   const title = titles[loc.pathname]
@@ -44,11 +44,14 @@ export function AppLayout() {
     || (loc.pathname.startsWith('/teacher/sessions/') ? ['Sessions', 'Class session history'] : null)
     || titles['/' + role + '/dashboard'];
   const avatar = user?.avatarUrl || user?.avatar;
-  const initials = initialsFor(user?.fullName);
+  const userName = displayName(user, language);
+  const initials = initialsForEntity(user, language);
 
   useEffect(() => {
     setMenuOpen(false);
     setNotificationsOpen(false);
+    setMobileSearchOpen(false);
+    setOpen(false);
   }, [loc.pathname]);
 
   useEffect(() => {
@@ -57,6 +60,8 @@ export function AppLayout() {
     }
     function onKeyDown(event) {
       if (event.key === 'Escape') setMenuOpen(false);
+      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') setMobileSearchOpen(false);
     }
     document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('keydown', onKeyDown);
@@ -68,13 +73,30 @@ export function AppLayout() {
 
   useEffect(() => {
     let cancelled = false;
-    if (role !== 'teacher' || !user?.id) {
+    if (!user?.id) {
       setSidebarInsight(null);
+      setDoctorFocus(null);
       return;
     }
-    teacherService.getSidebarInsight(user.id).then(insight => {
-      if (!cancelled) setSidebarInsight(insight);
-    });
+    if (role === 'teacher') {
+      teacherService.getSidebarInsight(user.id).then(insight => {
+        if (!cancelled) setSidebarInsight(insight);
+      });
+    } else if (role === 'doctor') {
+      dashboardService.getDoctorDashboard(user.id).then(dashboard => {
+        if (cancelled) return;
+        const hasPlanUpdates = dashboard.metrics.plansNeedUpdate > 0;
+        const elevatedStress = dashboard.clinicalQueue.some(patient => patient.baselineMetrics?.stress >= 45);
+        setDoctorFocus(hasPlanUpdates
+          ? { description: 'Review plans that need updates before issuing new recommendations.', href: '/doctor/therapy-plans' }
+          : elevatedStress
+            ? { description: 'Review elevated stress patterns before changing intervention intensity.', href: '/doctor/analytics' }
+            : { description: 'Continue monitoring classroom evidence and therapy progress.', href: '/doctor/timeline' });
+      });
+    } else {
+      setSidebarInsight(null);
+      setDoctorFocus(null);
+    }
     return () => {
       cancelled = true;
     };
@@ -93,6 +115,12 @@ export function AppLayout() {
     nav('/login');
   };
 
+  const parentSidebarText = loc.pathname.includes('recommendations')
+    ? 'Use a short calming routine before homework.'
+    : loc.pathname.includes('progress')
+      ? 'Encourage positive participation at home.'
+      : 'Continue the supportive routine.';
+
   return (
     <div className="app-shell" dir={dir}>
       <aside className={`sidebar ${open ? 'open' : ''}`}>
@@ -106,11 +134,12 @@ export function AppLayout() {
         </nav>
         <div className="sidebar-tip">
           <h4>{t(role === 'teacher' ? sidebarInsight?.title || 'Intervention Insight' : role === 'doctor' ? 'Clinical Focus' : 'SWAYA supports you')}</h4>
-          <p>{t(role === 'teacher' ? sidebarInsight?.description || 'Use early interventions when stress begins to rise.' : role === 'doctor' ? 'Review behavior trends before updating therapy plans.' : 'Your child is supported with role-based insight.')}</p>
-          <button className="sidebar-guidance" onClick={() => nav(role === 'teacher' ? sidebarInsight?.href || '/teacher/recommendations' : role === 'doctor' ? '/doctor/recommendations' : '/parent/recommendations')}>{t('View guidance')}</button>
+          <p>{t(role === 'teacher' ? sidebarInsight?.description || 'Use early interventions when stress begins to rise.' : role === 'doctor' ? doctorFocus?.description || 'Review behavior trends before updating therapy plans.' : parentSidebarText)}</p>
+          <button className="sidebar-guidance" onClick={() => nav(role === 'teacher' ? sidebarInsight?.href || '/teacher/recommendations' : role === 'doctor' ? doctorFocus?.href || '/doctor/recommendations' : '/parent/recommendations')}>{t('View guidance')}</button>
         </div>
         <div className="sidebar-foot">SWAYA v1.0.0<br/>{t('Beta build')}</div>
       </aside>
+      {open && <button className="sidebar-overlay" aria-label={t('Close menu')} onClick={() => setOpen(false)} />}
       <main className="main">
         <header className="topbar">
           <div className="topbar-left">
@@ -122,6 +151,9 @@ export function AppLayout() {
           </div>
           <GlobalSearch className="topbar-search"/>
           <div className="top-actions">
+            <button className="icon-button mobile-search-button" aria-label={t('Search')} onClick={() => { setMenuOpen(false); setNotificationsOpen(false); setMobileSearchOpen(value => !value); }}>
+              <Search size={17}/>
+            </button>
             <button className="language-toggle" onClick={toggleLanguage}>
               <Languages size={16}/><span>{isArabic ? 'English' : 'العربية'}</span>
             </button>
@@ -130,7 +162,7 @@ export function AppLayout() {
               <button className="profile-trigger" aria-label={t('Account menu')} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => { setNotificationsOpen(false); setMenuOpen(value => !value); }}>
                 {avatar ? <img className="avatar" src={avatar} alt=""/> : <span className="avatar">{initials}</span>}
                 <span className="profile-copy">
-                  <b>{user?.fullName}</b>
+                  <b>{userName}</b>
                   <span>{t(role)}</span>
                 </span>
                 <ChevronDown size={16} className={menuOpen ? 'chevron open' : 'chevron'}/>
@@ -140,7 +172,7 @@ export function AppLayout() {
                   <motion.div className="profile-dropdown" role="menu" initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ duration: 0.16 }}>
                     <div className="profile-dropdown-head">
                       {avatar ? <img className="avatar avatar-lg" src={avatar} alt=""/> : <span className="avatar avatar-lg">{initials}</span>}
-                      <div><b>{user?.fullName}</b><span>{t(role)}</span></div>
+                      <div><b>{userName}</b><span>{t(role)}</span></div>
                     </div>
                     <div className="profile-dropdown-list">
                       {profileActions.map(([to, Icon, label]) => (
@@ -155,6 +187,7 @@ export function AppLayout() {
             </div>
           </div>
         </header>
+        {mobileSearchOpen && <div className="mobile-search-row"><GlobalSearch className="mobile-search"/></div>}
         <div className="content">
           <AnimatePresence mode="wait"><PageTransition key={loc.pathname}><Outlet/></PageTransition></AnimatePresence>
         </div>

@@ -71,8 +71,8 @@ export default function Welcome() {
                 <Sparkles size={14} />
                 {t('Inclusive AI Monitoring Platform')}
               </span>
-              <h1 className="landing-title">See. Understand. Support.</h1>
-              <div className="landing-subtitle">راقب. افهم. ادعم.</div>
+              <h1 className="landing-title">{t('See. Understand. Support.')}</h1>
+              <div className="landing-subtitle">{t('Inclusive AI Monitoring Platform')}</div>
               <p className="landing-description">
                 {t('Monitor classroom behavior, understand student needs, and support inclusive education through AI, robotics, and real-time insights.')}
               </p>

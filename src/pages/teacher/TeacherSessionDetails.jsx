@@ -68,7 +68,7 @@ export default function TeacherSessionDetails() {
             {page.robotSummary.map(item => (
               <div key={item} className="teacher-list-row emphasis">
                 <div>
-                  <strong>{item}</strong>
+                  <strong>{t(item)}</strong>
                 </div>
                 <Bot size={16} />
               </div>
@@ -90,10 +90,10 @@ export default function TeacherSessionDetails() {
               <div key={item.id} className="teacher-timeline-row">
                 <span className={`teacher-timeline-dot ${item.tone}`} />
                 <div>
-                  <b>{item.title}</b>
-                  <p>{item.detail}</p>
+                  <b>{t(item.title)}</b>
+                  <p>{t(item.detail)}</p>
                 </div>
-                <span>{item.time}</span>
+                <span>{t(item.time)}</span>
               </div>
             ))}
           </div>
@@ -115,9 +115,9 @@ export default function TeacherSessionDetails() {
                     <StatusBadge status={note.severityTone}>{note.severity}</StatusBadge>
                     <StatusBadge status="blue">{note.category}</StatusBadge>
                   </div>
-                  <span>{note.timestampLabel}</span>
+                  <span>{t(note.timestampLabel)}</span>
                 </div>
-                <p>{note.content}</p>
+                <p>{t(note.content)}</p>
               </div>
             )) : <EmptyState title="No data yet" description="Notes will appear here when available." />}
           </div>
@@ -135,8 +135,8 @@ export default function TeacherSessionDetails() {
           {page.sessionAlerts.length ? page.sessionAlerts.map(alert => (
             <div key={alert.id} className="teacher-recommendation-card">
               <StatusBadge status={alert.severity}>{alert.severity}</StatusBadge>
-              <h3>{alert.studentName}</h3>
-              <p>{alert.message}</p>
+              <h3>{t(alert.studentName)}</h3>
+              <p>{t(alert.message)}</p>
             </div>
           )) : <EmptyState title="No active alerts" description="No active alerts were recorded for this session." />}
         </div>

@@ -10,6 +10,7 @@ import { pct, statusFromMetrics } from '../../utils/formatters';
 import { scenarios } from '../../simulation/scenarios';
 import { useLiveSessionStore } from '../../store/liveSessionStore';
 import { useI18n } from '../../i18n';
+import { displayName, initialsForEntity } from '../../utils/localization';
 
 const fadeItem = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 4 }, transition: { duration: 0.18 } };
 
@@ -25,7 +26,7 @@ export function SessionHeader({ classes, selectedClassId, setSelectedClassId, on
         <div>
           <div className="small muted">{t('Class')}</div>
           <select className="select" value={selectedClassId} onChange={event => setSelectedClassId(event.target.value)} disabled={active}>
-            {classes.map(classroom => <option value={classroom.id} key={classroom.id}>{classroom.name}</option>)}
+            {classes.map(classroom => <option value={classroom.id} key={classroom.id}>{t(classroom.name)}</option>)}
           </select>
           <div className="small muted" style={{ marginTop: 8 }}>{t('Students')}: {st.students?.length || 0} · {t('ASD students')}: {asdCount}</div>
         </div>
@@ -36,7 +37,7 @@ export function SessionHeader({ classes, selectedClassId, setSelectedClassId, on
         <div>
           <div className="small muted">{t('Session time')}</div>
           <h2 style={{ margin: '5px 0', fontSize: 22 }}>00:{String(18 + st.tick).padStart(2, '0')}:{String((st.tick * 2) % 60).padStart(2, '0')}</h2>
-          <div className="small muted">{t('Started 09:00 AM')}</div>
+          <div className="small muted">{t('Started 09:00')}</div>
         </div>
         <div style={{ display: 'flex', gap: 9, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
           {st.status === 'idle' || st.status === 'ended'
@@ -52,7 +53,7 @@ export function SessionHeader({ classes, selectedClassId, setSelectedClassId, on
 }
 
 export function ScenarioController({ students }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const st = useLiveSessionStore();
 
   return (
@@ -68,13 +69,13 @@ export function ScenarioController({ students }) {
         <label>
           <div className="small muted">{t('Scenario')}</div>
           <select className="select" style={{ width: '100%' }} value={st.selectedScenario} onChange={event => st.setScenario(event.target.value, st.targetStudentId || students[0]?.id)}>
-            {scenarios.map(scenario => <option key={scenario.id} value={scenario.id}>{scenario.name}</option>)}
+            {scenarios.map(scenario => <option key={scenario.id} value={scenario.id}>{t(scenario.name)}</option>)}
           </select>
         </label>
         <label>
           <div className="small muted">{t('Target student')}</div>
           <select className="select" style={{ width: '100%' }} value={st.targetStudentId || students[0]?.id || ''} onChange={event => st.setScenario(st.selectedScenario, event.target.value)}>
-            {students.map(student => <option key={student.id} value={student.id}>{student.fullName}</option>)}
+            {students.map(student => <option key={student.id} value={student.id}>{displayName(student, language)}</option>)}
           </select>
         </label>
         <div style={{ display: 'flex', alignItems: 'end', gap: 9, flexWrap: 'wrap' }}>
@@ -122,12 +123,12 @@ export function AlertsPanel() {
             : activeAlerts.map(alert => (
               <motion.div {...fadeItem} layout key={alert.id} className={`alert-card ${alert.severity === 'critical' ? 'critical' : ''}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <div><b>{alert.studentName}</b><div className="small muted">{t(alert.type.replace('_', ' '))}</div></div>
+                  <div><b>{t(alert.studentName)}</b><div className="small muted">{t(alert.type.replace('_', ' '))}</div></div>
                   <StatusBadge status={alert.severity === 'critical' ? 'critical' : 'warning'}>{t(alert.severity)}</StatusBadge>
                 </div>
                 <div style={{ margin: '9px 0' }}>
-                  <b style={{ color: alert.severity === 'critical' ? 'var(--red)' : 'var(--orange)' }}>{alert.message}</b>
-                  <br /><span className="small">{t('Suggested intervention')}: {alert.suggestedAction}</span>
+                  <b style={{ color: alert.severity === 'critical' ? 'var(--red)' : 'var(--orange)' }}>{t(alert.message)}</b>
+                  <br /><span className="small">{t('Suggested intervention')}: {t(alert.suggestedAction)}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <Button variant="soft" onClick={() => st.focusStudent(alert.studentId)} style={{ flex: 1 }}>{t('Focus')}</Button>
@@ -142,7 +143,7 @@ export function AlertsPanel() {
 }
 
 export function StudentsGrid() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const st = useLiveSessionStore();
   const [filter, setFilter] = React.useState('all');
   const cards = st.students.filter(student => {
@@ -182,8 +183,8 @@ export function StudentsGrid() {
             return (
               <motion.div {...fadeItem} layout key={student.id} className={`student-card ${st.focusedStudentId === student.id ? 'focused' : ''} ${status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : ''}`} onClick={() => st.focusStudent(student.id)}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <div className="avatar">{student.shortName?.slice(0, 1) || student.fullName?.slice(0, 1)}</div>
-                  <div><b>{student.fullName}</b><div className="small muted">{student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : t('Typical student')}</div></div>
+                  <div className="avatar">{initialsForEntity(student, language)}</div>
+                  <div><b>{displayName(student, language)}</b><div className="small muted">{student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : `${t('Typical')} · ${t('Not applicable')}`}</div></div>
                 </div>
                 <div className="mini-row"><span>{t('Attention')}</span><b>{pct(metrics.attention)}</b></div>
                 <div className="mini-row"><span>{t('Engagement')}</span><b>{pct(metrics.engagement)}</b></div>
@@ -200,7 +201,7 @@ export function StudentsGrid() {
 }
 
 export function StudentFocus() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const st = useLiveSessionStore();
   const student = st.students.find(item => item.id === st.focusedStudentId) || st.students.find(item => item.id === st.targetStudentId) || st.students[0];
   if (!student) return <Card><b>{t('Student Focus')}</b><p className="muted">{t('Start a session to focus on a student.')}</p></Card>;
@@ -211,7 +212,7 @@ export function StudentFocus() {
     <motion.div layout>
       <Card>
         <div className="section-title">
-          <h2>{t('Student Focus')}: {student.fullName}</h2>
+          <h2>{t('Student Focus')}: {displayName(student, language)}</h2>
           <StatusBadge status={statusFromMetrics(metrics)}>{t(metrics.emotionalState || 'calm')}</StatusBadge>
         </div>
         <div className="grid grid-2">
@@ -275,7 +276,7 @@ export function Timeline() {
         {st.timelineEvents.slice(-9).map(event => (
           <div className="timeline-item" key={event.id}>
             <div className="timeline-dot">{event.type === 'robot_action' ? <Bot size={16} /> : event.type === 'alert_created' ? <AlertTriangle size={16} /> : <Activity size={16} />}</div>
-            <div><div className="small muted">{event.timestamp}</div><b>{event.title}</b><div className="small muted">{event.description}</div></div>
+            <div><div className="small muted">{event.timestamp}</div><b>{t(event.title)}</b><div className="small muted">{t(event.description)}</div></div>
           </div>
         ))}
       </div>

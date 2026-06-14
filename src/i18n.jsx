@@ -1,6 +1,20 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-const STORAGE_KEY = 'swaya_language';
+const STORAGE_KEY = 'language';
+const I18NEXT_STORAGE_KEY = 'i18nextLng';
+const LEGACY_STORAGE_KEY = 'swaya_language';
+
+function normalizeLanguage(value) {
+  return value === 'en' || value === 'ar' ? value : null;
+}
+
+function getInitialLanguage() {
+  const savedLanguage =
+    normalizeLanguage(localStorage.getItem(STORAGE_KEY))
+    || normalizeLanguage(localStorage.getItem(I18NEXT_STORAGE_KEY));
+
+  return savedLanguage || 'ar';
+}
 
 const ar = {
   'Overview': 'نظرة عامة',
@@ -71,7 +85,7 @@ const ar = {
   'Account preferences and notification settings will appear here.': 'ستظهر تفضيلات الحساب وإعدادات الإشعارات هنا.',
   'Password and session controls will appear here.': 'ستظهر عناصر كلمة المرور والجلسات هنا.',
   'teacher': 'معلم',
-  'doctor': 'طبيب',
+  'doctor': 'الأخصائي',
   'parent': 'ولي أمر',
   'Class monitoring workspace': 'مساحة مراقبة الصف',
   'Three students need attention today. Start a live session for real-time support actions.': 'يحتاج ثلاثة طلاب إلى انتباه اليوم. ابدأ جلسة مباشرة لاتخاذ إجراءات دعم لحظية.',
@@ -533,16 +547,829 @@ const ar = {
   'paused': '\u0645\u062a\u0648\u0642\u0641\u0629 \u0645\u0624\u0642\u062a\u0627\u064b',
   'ended': '\u0645\u0646\u062a\u0647\u064a\u0629',
   'calm': '\u0647\u0627\u062f\u0626',
+  'See. Understand. Support.': 'راقب. افهم. ادعم.',
+  'Enter Workspace': 'دخول المنصة',
+  'Learn More': 'معرفة المزيد',
+  'Sign in to SWAYA': 'تسجيل الدخول إلى SWAYA',
+  'Secure role-based access': 'وصول آمن حسب الدور',
+  'Secure monitoring platform': 'منصة مراقبة آمنة',
+  'Inclusive AI Monitoring Platform': 'منصة مراقبة ذكية للتعليم الدامج',
+  'Monitor classroom behavior, understand student needs, and support inclusive education through AI, robotics, and real-time insights.': 'راقب سلوك الصف، وافهم احتياجات الطلاب، وادعم التعليم الدامج من خلال الذكاء الاصطناعي والروبوتات والرؤى الفورية.',
+  'Teacher': 'المعلم',
+  'Doctor': 'الأخصائي',
+  'Parent': 'ولي الأمر',
+  'Admin': 'المسؤول',
+  'Doctor Overview': 'نظرة عامة للأخصائي',
+  'Teacher Overview': 'نظرة عامة للمعلم',
+  'Parent Overview': 'نظرة عامة لولي الأمر',
+  'Doctor dashboard': 'لوحة الأخصائي',
+  'Class monitoring workspace': 'مساحة مراقبة الصف',
+  'Clinical Review Center': 'مركز المراجعة السريرية',
+  'Start Live Session': 'بدء الجلسة المباشرة',
+  'Live Monitoring': 'المراقبة المباشرة',
+  'AI Online': 'الذكاء الاصطناعي متصل',
+  'Robot Connected': 'الروبوت متصل',
+  'Robot connected': 'الروبوت متصل',
+  'Camera Active': 'الكاميرا نشطة',
+  'Camera Warning': 'تنبيه الكاميرا',
+  'Last updated': 'آخر تحديث',
+  'just now': 'الآن',
+  'Students need attention today': 'طلاب يحتاجون إلى متابعة اليوم',
+  '{{count}} students need attention today. Start a live session for real-time support actions.': '{{count}} طلاب يحتاجون إلى متابعة اليوم. ابدأ جلسة مباشرة لإجراءات دعم فورية.',
+  '{{count}} students need attention': '{{count}} طلاب يحتاجون إلى متابعة',
+  'Class status is stable. Continue monitoring live classroom signals.': 'حالة الصف مستقرة. استمر في مراقبة إشارات الصف المباشرة.',
+  'Class status is stable': 'حالة الصف مستقرة',
+  'Assigned Patients': 'الحالات المسندة',
+  'Avg Attention': 'متوسط الانتباه',
+  'Avg Engagement': 'متوسط التفاعل',
+  'Avg Stress': 'متوسط التوتر',
+  'Recent Alerts': 'التنبيهات الأخيرة',
+  'Need Review': 'تحتاج إلى مراجعة',
+  'Reports This Week': 'تقارير هذا الأسبوع',
+  'Wellbeing': 'الرفاه العام',
+  'Overall Wellbeing': 'الرفاه العام',
+  'Active': 'نشط',
+  'Stable': 'مستقر',
+  'Improving': 'يتحسن',
+  'Need Follow-up': 'يحتاج إلى متابعة',
+  'Needs follow-up': 'يحتاج إلى متابعة',
+  'High Risk': 'خطر مرتفع',
+  'Moderate Risk': 'خطر متوسط',
+  'Low Risk': 'خطر منخفض',
+  'Critical': 'حرج',
+  'Warning': 'تنبيه',
+  'Info': 'معلومة',
+  'Success': 'تم بنجاح',
+  'Draft': 'مسودة',
+  'Published': 'منشور',
+  'Pending Review': 'بانتظار المراجعة',
+  'ASD': 'اضطراب طيف التوحد',
+  'ASD Moderate': 'اضطراب طيف التوحد - متوسط',
+  'View Details': 'عرض التفاصيل',
+  'View Report': 'عرض التقرير',
+  'Download': 'تنزيل',
+  'Share': 'مشاركة',
+  'View Guidance': 'عرض الإرشادات',
+  'View guidance': 'عرض الإرشادات',
+  'View Analytics': 'عرض التحليلات',
+  'View analytics': 'عرض التحليلات',
+  'View all notifications': 'عرض كل الإشعارات',
+  'Search': 'بحث',
+  'Search students, sessions, reports...': 'ابحث عن الطلاب أو الجلسات أو التقارير...',
+  'Search students, sessions, reports…': 'ابحث عن الطلاب أو الجلسات أو التقارير...',
+  'No results found': 'لا توجد نتائج',
+  'No data available': 'لا توجد بيانات متاحة',
+  'No data yet': 'لا توجد بيانات بعد',
+  'Content will appear here when available.': 'سيظهر المحتوى هنا عند توفره.',
+  'Loading workspace data': 'جاري تحميل بيانات مساحة العمل',
+  'Something went wrong': 'حدث خطأ',
+  'Please try again.': 'يرجى المحاولة مرة أخرى.',
+  'Demo environment enabled': 'بيئة تجريبية مفعّلة',
+  'Use the provided demo credentials for role-based preview.': 'استخدم بيانات الدخول التجريبية لمعاينة المنصة حسب الدور.',
+  'Email Address': 'البريد الإلكتروني',
+  'Password': 'كلمة المرور',
+  'Remember me': 'تذكرني',
+  'Forgot password?': 'هل نسيت كلمة المرور؟',
+  'Enter Teacher Workspace': 'دخول منصة المعلم',
+  'Enter Doctor Workspace': 'دخول منصة الأخصائي',
+  'Enter Parent Workspace': 'دخول منصة ولي الأمر',
+  'Select your role and continue to your secure dashboard.': 'حدد دورك وانتقل إلى لوحتك الآمنة.',
+  'Access live monitoring, behavioral insights, reports, and stakeholder collaboration from one secure platform.': 'يمكنك الوصول إلى المراقبة المباشرة والرؤى السلوكية والتقارير والتعاون بين أصحاب المصلحة من منصة آمنة واحدة.',
+  'Live classroom monitoring': 'مراقبة الصف المباشرة',
+  'Track attention, engagement, and stress signals in real time.': 'تتبع إشارات الانتباه والتفاعل والتوتر لحظيًا.',
+  'Behavioral analytics': 'تحليلات سلوكية',
+  'Review trends and risk indicators with role-specific context.': 'راجع الاتجاهات ومؤشرات الخطر بسياق مخصص لكل دور.',
+  'Reports and clinical insights': 'تقارير ورؤى سريرية',
+  'Use structured reports and recommendations for follow-up decisions.': 'استخدم تقارير وتوصيات منظمة لدعم قرارات المتابعة.',
+  'Live classroom monitoring and student support workflows.': 'مراقبة صفية مباشرة وسير عمل لدعم الطلاب.',
+  'Clinical review, recommendations, and therapy planning.': 'مراجعة سريرية وتوصيات وتخطيط علاجي.',
+  'Parent-safe progress updates and home guidance.': 'تحديثات تقدم مناسبة لولي الأمر وإرشاد منزلي.',
+  'Email is required.': 'البريد الإلكتروني مطلوب.',
+  'Password is required.': 'كلمة المرور مطلوبة.',
+  'Invalid credentials for the selected role.': 'بيانات الدخول غير صحيحة للدور المحدد.',
+  'Password reset is not connected in this demo environment.': 'إعادة تعيين كلمة المرور غير متصلة في بيئة العرض.',
+  'Enter your password': 'أدخل كلمة المرور',
+  'Hide password': 'إخفاء كلمة المرور',
+  'Show password': 'إظهار كلمة المرور',
+  'Secure access': 'وصول آمن',
+  'Role-based permissions': 'صلاحيات حسب الدور',
+  'Encrypted data flow': 'تدفق بيانات مشفر',
+  'Arabic/English support': 'دعم العربية والإنجليزية',
+  'Secure by design': 'آمن حسب التصميم',
+  'Role-based access': 'وصول حسب الدور',
+  'Real-time support': 'دعم فوري',
+  'Arabic & English': 'العربية والإنجليزية',
+  'Platform trust badges': 'شارات الثقة في المنصة',
+  'Teachers': 'المعلمون',
+  'Parents': 'أولياء الأمور',
+  'Doctors': 'الأخصائيون',
+  'Live monitoring and classroom alerts': 'مراقبة مباشرة وتنبيهات صفية',
+  'Friendly progress summaries': 'ملخصات تقدم مبسطة',
+  'Clinical insights and therapy planning': 'رؤى سريرية وتخطيط علاجي',
+  'Live attention': 'انتباه مباشر',
+  'Stress support': 'دعم التوتر',
+  'Teacher alert': 'تنبيه للمعلم',
+  'Built for every support role': 'مصممة لكل دور داعم',
+  'Platform overview': 'نظرة عامة على المنصة',
+  'Attention': 'الانتباه',
+  'Engagement': 'التفاعل',
+  'Stress': 'التوتر',
+  'Social': 'الاجتماعي',
+  'Social Interaction': 'التفاعل الاجتماعي',
+  'Day': 'اليوم',
+  'Week': 'الأسبوع',
+  'Month': 'الشهر',
+  'Today': 'اليوم',
+  'This Week': 'هذا الأسبوع',
+  'This Month': 'هذا الشهر',
+  'All': 'الكل',
+  'Weekly': 'أسبوعي',
+  'Monthly': 'شهري',
+  'Abdullah is improving steadily': 'عبدالله يتحسن بشكل مستقر',
+  'Parent-friendly weekly progress summary': 'ملخص أسبوعي مبسط لولي الأمر',
+  'Parent-friendly monthly progress summary': 'ملخص شهري مبسط لولي الأمر',
+  'Positive week': 'أسبوع إيجابي',
+  'Stress is lower today': 'التوتر أقل اليوم',
+  'Engagement is good': 'التفاعل جيد',
+  'Support received': 'تم تقديم الدعم',
+  'Home Tip': 'نصيحة منزلية',
+  'Needs Support': 'يحتاج إلى دعم',
+  'Positive Achievements': 'إنجازات إيجابية',
+  'Current mood': 'المزاج الحالي',
+  'Lower': 'أقل',
+  'Calm': 'هادئ',
+  'Good': 'جيد',
+  'Wellbeing score': 'درجة الرفاه',
+  'Engagement improving': 'التفاعل يتحسن',
+  'Stress lower': 'التوتر أقل',
+  'Attention and engagement are trending upward this week.': 'يتجه الانتباه والتفاعل نحو التحسن هذا الأسبوع.',
+  'Progress is steady this month, with lower stress signals and stronger participation.': 'التقدم ثابت هذا الشهر، مع إشارات توتر أقل ومشاركة أقوى.',
+  'Abdullah showed steady engagement and lower stress signals this week.': 'أظهر عبدالله تفاعلاً مستقرًا وإشارات توتر أقل هذا الأسبوع.',
+  'Abdullah participated in a group activity and responded well to calming support.': 'شارك عبدالله في نشاط جماعي واستجاب جيدًا للدعم المهدئ.',
+  'Transitions between activities may still need short preparation.': 'قد يحتاج الانتقال بين الأنشطة إلى تحضير قصير.',
+  'Practice a short calming routine before homework.': 'جرّب روتين تهدئة قصيرًا قبل الواجب.',
+  'View details': 'عرض التفاصيل',
+  'Save tip': 'حفظ النصيحة',
+  'Class Trends': 'اتجاهات الصف',
+  'Class Trend': 'اتجاه الصف',
+  'Class Snapshot': 'لمحة الصف',
+  'Student Comparison': 'مقارنة الطلاب',
+  'Behavior Trends': 'اتجاهات السلوك',
+  'Session Metrics': 'مؤشرات الجلسة',
+  'Long-term Trends': 'اتجاهات طويلة المدى',
+  'Live attention, engagement, and stress signals': 'إشارات الانتباه والتفاعل والتوتر المباشرة',
+  'Recent attention, engagement, and stress': 'الانتباه والتفاعل والتوتر حديثًا',
+  'Clinical behavior pattern view': 'عرض الأنماط السلوكية السريرية',
+  'Attention, engagement, and stress by student': 'الانتباه والتفاعل والتوتر لكل طالب',
+  'Weekly monitoring pattern across the class': 'نمط المراقبة الأسبوعي عبر الصف',
+  'Risk distribution': 'توزيع المخاطر',
+  'Top improving students': 'أفضل الطلاب تحسنًا',
+  'Students needing follow-up': 'طلاب يحتاجون إلى متابعة',
+  'Review classroom reports, session exports, and pending follow-up summaries.': 'راجع تقارير الصف وصادرات الجلسات وملخصات المتابعة المعلقة.',
+  'Capture classroom observations, severity, and interventions with structured teacher notes.': 'سجل ملاحظات الصف والشدة والتدخلات ضمن ملاحظات منظمة للمعلم.',
+  'Run a real-time classroom monitoring session with alerts, robot controls, and quick teacher observations.': 'شغل جلسة مراقبة صفية مباشرة مع التنبيهات وتحكم الروبوت وملاحظات المعلم السريعة.',
+  'Review assigned patients, analyze behavioral patterns, and update therapy plans using classroom evidence.': 'راجع الحالات المسندة، وحلل الأنماط السلوكية، وحدّث الخطط العلاجية باستخدام أدلة الصف.',
+  'Review system alerts, session events, reports, and clinical updates.': 'راجع تنبيهات النظام وأحداث الجلسات والتقارير والتحديثات السريرية.',
+  'Pages': 'الصفحات',
+  'Status': 'الحالة',
+  'Date': 'التاريخ',
+  'Duration': 'المدة',
+  'Action': 'الإجراء',
+  'Session title': 'عنوان الجلسة',
+  'Date/time': 'التاريخ/الوقت',
+  'Alerts count': 'عدد التنبيهات',
+  'Support level': 'مستوى الدعم',
+  'Current status': 'الحالة الحالية',
+  'Latest': 'الأحدث',
+  'latest': 'الأحدث',
+  'Elevated stress': 'توتر مرتفع',
+  'Low stress': 'توتر منخفض',
+  'No urgent action': 'لا يوجد إجراء عاجل',
+  'No recent session': 'لا توجد جلسة حديثة',
+  'No sessions are linked to this student yet.': 'لا توجد جلسات مرتبطة بهذا الطالب بعد.',
+  'Student details could not be loaded.': 'لم يمكن تحميل تفاصيل الطالب.',
+  'Session details could not be loaded.': 'لم يمكن تحميل تفاصيل الجلسة.',
+  'Recommendations will appear here when available.': 'ستظهر التوصيات هنا عند توفرها.',
+  'Notes will appear here when available.': 'ستظهر الملاحظات هنا عند توفرها.',
+  'Try a different filter or search query.': 'جرّب فلترًا أو عبارة بحث مختلفة.',
+  'Try a different session filter or search query.': 'جرّب فلتر جلسات أو عبارة بحث مختلفة.',
+  'Try a different report filter or search query.': 'جرّب فلتر تقارير أو عبارة بحث مختلفة.',
+  'Try a different note filter or search query.': 'جرّب فلتر ملاحظات أو عبارة بحث مختلفة.',
+  'No active alerts': 'لا توجد تنبيهات نشطة',
+  'No active alerts were recorded for this session.': 'لم يتم تسجيل تنبيهات نشطة لهذه الجلسة.',
+  'Select a report to review.': 'حدد تقريرًا لمراجعته.',
+  'Morning Social Activity': 'نشاط اجتماعي صباحي',
+  'Group Reading': 'قراءة جماعية',
+  'Interactive Story': 'قصة تفاعلية',
+  'Collaborative Puzzle': 'لغز تعاوني',
+  "Abdullah's Weekly Progress Summary": 'ملخص التقدم الأسبوعي لعبدالله',
+  'Clinical Behavior Analysis': 'تحليل السلوك السريري',
+  'Class Session Report': 'تقرير جلسة الصف',
+  'Abdullah showed better participation this week and responded well to calming support.': 'أظهر عبدالله مشاركة أفضل هذا الأسبوع واستجاب جيدًا للدعم المهدئ.',
+  'Stress events appear linked to group transition activities.': 'تبدو حالات التوتر مرتبطة بأنشطة الانتقال الجماعي.',
+  'Class engagement improved after group prompt.': 'تحسن تفاعل الصف بعد التوجيه الجماعي.',
+  'Abdullah responded well after calm mode was activated.': 'استجاب عبدالله جيدًا بعد تفعيل وضع التهدئة.',
+  'Repeated stress response appears linked to group transition activities.': 'تبدو استجابة التوتر المتكررة مرتبطة بأنشطة الانتقال الجماعي.',
+  'Noor loses attention after long verbal instructions.': 'تفقد نور انتباهها بعد التعليمات اللفظية الطويلة.',
+  'Use early calm intervention': 'استخدم تدخل التهدئة المبكر',
+  "Activate calm mode when Abdullah's stress rises above 65% instead of waiting for critical level.": 'فعّل وضع التهدئة عندما يرتفع توتر عبدالله فوق 65% بدلًا من انتظار الوصول إلى مستوى حرج.',
+  'Practice calming routine': 'تدرب على روتين التهدئة',
+  'Practice a short calming routine at home three times per week.': 'درّب على روتين تهدئة قصير في المنزل ثلاث مرات أسبوعيًا.',
+  'Try a simple 3-minute calming activity with Abdullah before homework.': 'جرّب نشاط تهدئة بسيطًا لمدة 3 دقائق مع عبدالله قبل الواجب.',
+  'Praise participation': 'عزز المشاركة',
+  'Praise small participation moments after school.': 'امتدح لحظات المشاركة الصغيرة بعد المدرسة.',
+  'Celebrate any effort Abdullah made in class, even if it was small.': 'احتفِ بأي جهد بذله عبدالله في الصف، حتى لو كان بسيطًا.',
+  'Stress increased during group transition.': 'ارتفع التوتر أثناء الانتقال الجماعي.',
+  'Attention dropped below threshold after verbal instructions.': 'انخفض الانتباه دون الحد بعد التعليمات اللفظية.',
+  'Engagement dropped during reading activity.': 'انخفض التفاعل أثناء نشاط القراءة.',
+  'Repeated elevated stress pattern detected.': 'تم رصد نمط متكرر من ارتفاع التوتر.',
+  'Critical stress level detected': 'تم اكتشاف مستوى توتر حرج',
+  'Low attention score warning': 'تنبيه انخفاض درجة الانتباه',
+  'Robot session completed': 'اكتملت جلسة الروبوت',
+  'New weekly report available': 'تقرير أسبوعي جديد متاح',
+  'Doctor added a recommendation': 'أضاف الأخصائي توصية',
+  'Student showed elevated stress during the current session.': 'أظهر الطالب توترًا مرتفعًا أثناء الجلسة الحالية.',
+  'Attention score dropped below the configured threshold.': 'انخفضت درجة الانتباه دون الحد المحدد.',
+  'The latest classroom robot session was completed successfully.': 'اكتملت آخر جلسة روبوت صفية بنجاح.',
+  'A weekly progress report is ready for review.': 'تقرير التقدم الأسبوعي جاهز للمراجعة.',
+  'A therapist added a new intervention recommendation.': 'أضاف الأخصائي توصية تدخل جديدة.',
+  'Students': 'الطلاب',
+  'Sessions': 'الجلسات',
+  'Reports': 'التقارير',
+  'Notes': 'الملاحظات',
+  'Alerts': 'التنبيهات',
+  'Pages': 'الصفحات',
+  'Dashboard': 'لوحة التحكم',
+  'Role overview': 'نظرة عامة حسب الدور',
+  'Trends and comparisons': 'اتجاهات ومقارنات',
+  'System updates and alerts': 'تحديثات النظام والتنبيهات',
+  'Child Session Summaries': 'ملخصات جلسات الطفل',
+  'min': 'دقيقة',
+  'Abdullah participated and received appropriate classroom support.': 'شارك عبدالله وتلقى دعمًا صفيًا مناسبًا.',
+  'Parent-Safe Reports': 'تقارير مناسبة لولي الأمر',
+  'Communication': 'التواصل',
+  'Stress Reduction': 'خفض التوتر',
+  'Why it helps: supports consistency between school and home.': 'سبب الفائدة: يدعم الاتساق بين المدرسة والمنزل.',
+  'Mark as Read': 'تحديد كمقروء',
+  'Message Teacher or Doctor': 'مراسلة المعلم أو الأخصائي',
+  'Mona Hassan - Teacher': 'منى حسن - المعلم',
+  'Dr. Ahmed Sami - Doctor': 'د. أحمد سامي - الأخصائي',
+  'Write a message...': 'اكتب رسالة...',
+  'Send Mock Message': 'إرسال رسالة تجريبية',
+  'Recent Messages': 'الرسائل الأخيرة',
+  'Teacher: Abdullah had a positive session today.': 'المعلم: كانت جلسة عبدالله إيجابية اليوم.',
+  'Doctor: Please continue the calming routine at home.': 'الأخصائي: يرجى الاستمرار في روتين التهدئة في المنزل.',
+  'Create Report': 'إنشاء تقرير',
+  'Existing Reports': 'التقارير الحالية',
+  'Clinical': 'سريري',
+  'Parent-safe': 'مناسب لولي الأمر',
+  'Clinical summary and recommendations...': 'ملخص سريري وتوصيات...',
+  'Add Recommendation': 'إضافة توصية',
+  'Active Recommendations': 'التوصيات النشطة',
+  'Title': 'العنوان',
+  'Recommendation details...': 'تفاصيل التوصية...',
+  'Save Recommendation': 'حفظ التوصية',
+  'Audience': 'الجمهور',
+  'Therapy Plan': 'الخطة العلاجية',
+  'Robot Style': 'أسلوب الروبوت',
+  'Sensory Level': 'المستوى الحسي',
+  'Goals': 'الأهداف',
+  'Classroom Strategies': 'استراتيجيات الصف',
+  'Home Strategies': 'استراتيجيات المنزل',
+  'Save Plan': 'حفظ الخطة',
+  'gentle': 'لطيف',
+  'balanced': 'متوازن',
+  'low': 'منخفض',
+  'medium': 'متوسط',
+  'Improve stress regulation': 'تحسين تنظيم التوتر',
+  'Increase group participation': 'زيادة المشاركة الجماعية',
+  'Improve attention during group tasks': 'تحسين الانتباه أثناء المهام الجماعية',
+  'stress_management': 'إدارة التوتر',
+  'social_interaction': 'التفاعل الاجتماعي',
+  'progress': 'تقدم',
+  'Use calm mode when stress starts rising.': 'استخدم وضع التهدئة عند بدء ارتفاع التوتر.',
+  'Give short transition warnings before activity changes.': 'قدم تنبيهات انتقال قصيرة قبل تغيير النشاط.',
+  'Praise effort and participation.': 'عزز الجهد والمشاركة.',
+  'Use short focused activities.': 'استخدم أنشطة قصيرة مركزة.',
+  'Patient Analytics': 'تحليلات الحالات',
+  'Intervention Response': 'استجابة التدخل',
+  'Behavior Pattern Trend': 'اتجاه النمط السلوكي',
+  'Assigned Patient Comparison': 'مقارنة الحالات المسندة',
+  'Clinical profile': 'ملف سريري',
+  'Edit Therapy Plan': 'تعديل الخطة العلاجية',
+  'Current Therapy Goals': 'أهداف العلاج الحالية',
+  'Progress': 'التقدم',
+  'Not authorized': 'غير مصرح',
+  'This page is not available for your role.': 'هذه الصفحة غير متاحة لدورك.',
+  'Back to login': 'العودة إلى تسجيل الدخول',
+  'All Events': 'كل الأحداث',
+  'Robot Actions': 'إجراءات الروبوت',
+  'Teacher note: Abdullah responded well to calm mode': 'ملاحظة المعلم: استجاب عبدالله جيدًا لوضع التهدئة',
+  'Alert: High stress during transition': 'تنبيه: توتر مرتفع أثناء الانتقال',
+  'Robot action: Calm mode activated': 'إجراء الروبوت: تم تفعيل وضع التهدئة',
+  'Clinical note: stress linked to transitions': 'ملاحظة سريرية: التوتر مرتبط بالانتقالات',
+  'Therapy plan updated: early calm intervention': 'تم تحديث الخطة العلاجية: تدخل تهدئة مبكر',
+  'responded well after calm mode was activated and participated more actively.': 'استجاب جيدًا بعد تفعيل وضع التهدئة وشارك بصورة أكثر فاعلية.',
+  'teacher': 'المعلم',
+  'doctor': 'الأخصائي',
+  'parent': 'ولي الأمر',
+  'Intervention Insight': 'إرشادات التدخل',
+  'Use early interventions when stress begins to rise.': 'استخدم تدخلات مبكرة عند بدء ارتفاع مؤشرات التوتر.',
+  'Stress intervention guidance': 'إرشادات التدخل عند التوتر',
+  'Attention support guidance': 'إرشادات دعم الانتباه',
+  'Positive reinforcement guidance': 'إرشادات التعزيز الإيجابي',
+  'students show elevated stress signals. Use calm mode and shorter transitions before stress escalates.': 'تظهر لدى بعض الطلاب مؤشرات توتر مرتفعة. استخدم وضع التهدئة وفترات انتقال أقصر قبل زيادة التوتر.',
+  'students need additional attention support. Use repeat instruction and shorter task blocks.': 'يحتاج بعض الطلاب إلى دعم إضافي للانتباه. استخدم تكرار التعليمات وتقسيم المهام إلى فترات أقصر.',
+  'Inclusive Class Weekly Summary': 'ملخص الصف الأسبوعي الدامج',
+  'Student Support Follow-up': 'متابعة دعم الطالب',
+  'Class attention and engagement trends improved across the latest monitored week.': 'تحسنت اتجاهات الانتباه والتفاعل في الصف خلال آخر أسبوع تمت مراقبته.',
+  'No additional student follow-up is required this week.': 'لا توجد حاجة إلى متابعة إضافية للطلاب هذا الأسبوع.',
+  'Published reports': 'التقارير المنشورة',
+  'Weekly reports': 'التقارير الأسبوعية',
+  'Session reports': 'تقارير الجلسات',
+  'Pending review': 'بانتظار المراجعة',
+  'Needs review': 'يحتاج إلى مراجعة',
+  'Ready to share': 'جاهز للمشاركة',
+  'Class summaries': 'ملخصات الصف',
+  'Live monitoring exports': 'صادرات المراقبة المباشرة',
+  'All clear': 'لا توجد ملاحظات',
+  'Total notes': 'إجمالي الملاحظات',
+  'High severity': 'شدة مرتفعة',
+  'Stress notes': 'ملاحظات التوتر',
+  'Recent updates': 'آخر التحديثات',
+  'Teacher observations': 'ملاحظات المعلم',
+  'Intervention focus': 'تركيز التدخل',
+  'Latest week': 'آخر أسبوع',
+  'Total sessions': 'إجمالي الجلسات',
+  'Average duration': 'متوسط المدة',
+  'Avg attention': 'متوسط الانتباه',
+  'Avg engagement': 'متوسط التفاعل',
+  'Avg stress': 'متوسط التوتر',
+  'Alerts this week': 'تنبيهات هذا الأسبوع',
+  'Consistent pacing': 'وتيرة منتظمة',
+  'Class focus trend': 'اتجاه تركيز الصف',
+  'Classwide focus': 'تركيز الصف العام',
+  'Improving participation': 'تحسن المشاركة',
+  'Healthy classroom': 'صف مستقر',
+  'Action required': 'إجراء مطلوب',
+  'Students needing support': 'طلاب يحتاجون إلى دعم',
+  'Structured support': 'دعم منظم',
+  'Light support': 'دعم خفيف',
+  'Extra support may help today': 'قد يفيد دعم إضافي اليوم',
+  'Engagement needs gentle support': 'يحتاج التفاعل إلى دعم هادئ',
+  'Unresolved clinical alert': 'تنبيه سريري غير معالج',
+  'Attention below threshold': 'الانتباه أقل من الحد',
+  'Stress pattern needs review': 'نمط التوتر يحتاج إلى مراجعة',
+  'Clinical patient cards with risk, metrics, and therapy plan status.': 'بطاقات حالات سريرية تعرض مستوى الخطر والمؤشرات وحالة الخطة العلاجية.',
+  'Total patients': 'إجمالي الحالات',
+  'High risk cases': 'حالات عالية الخطورة',
+  'Need follow-up': 'تحتاج إلى متابعة',
+  'Last session': 'آخر جلسة',
+  'Clinical patterns across attention, engagement, stress, and intervention response.': 'أنماط سريرية عبر الانتباه والتفاعل والتوتر واستجابة التدخل.',
+  'Cases needing intervention': 'حالات تحتاج إلى تدخل',
+  'Attention, engagement, and stress by patient': 'الانتباه والتفاعل والتوتر حسب الحالة',
+  'Stress decreased after calm mode': 'انخفض التوتر بعد وضع التهدئة',
+  'Stress decreased for two cases after activating calm mode.': 'انخفض التوتر لدى حالتين بعد تفعيل وضع التهدئة.',
+  'Intervention plan review': 'مراجعة خطة التدخل',
+  'One case needs intervention plan review.': 'تحتاج حالة واحدة إلى مراجعة خطة التدخل.',
+  'Need update': 'تحتاج إلى تحديث',
+  'Recent recommendations': 'توصيات حديثة',
+  'Goals in progress': 'أهداف قيد التقدم',
+  'Communication style': 'نمط التواصل',
+  'visual_support': 'دعم بصري',
+  'mixed': 'مختلط',
+  'Please add at least one therapy goal.': 'يرجى إضافة هدف علاجي واحد على الأقل.',
+  'Therapy plan saved successfully.': 'تم حفظ الخطة العلاجية بنجاح.',
+  'Update Plan': 'تحديث الخطة',
+  'Current reports': 'التقارير الحالية',
+  'Prepare clinical or parent-safe reports from classroom evidence.': 'جهز تقارير سريرية أو مناسبة لولي الأمر اعتمادًا على أدلة الصف.',
+  'Patient': 'الحالة',
+  'Report details': 'تفاصيل التقرير',
+  'Clinical reports, parent-safe reports, and draft summaries.': 'تقارير سريرية وتقارير مناسبة لولي الأمر وملخصات مسودة.',
+  'Please select a patient and write report details.': 'يرجى اختيار الحالة وكتابة تفاصيل التقرير.',
+  'Report created as draft.': 'تم إنشاء التقرير كمسودة.',
+  'parent_safe': 'مناسب لولي الأمر',
+  'Teacher recommendations': 'توصيات للمعلم',
+  'Parent recommendations': 'توصيات لولي الأمر',
+  'Create clear guidance for teachers or parents with priority context.': 'أنشئ إرشادات واضحة للمعلم أو ولي الأمر مع تحديد الأولوية.',
+  'Priority': 'الأولوية',
+  'High': 'مرتفع',
+  'Medium': 'متوسط',
+  'Low': 'منخفض',
+  'Recommendation details': 'تفاصيل التوصية',
+  'Please complete patient, title, and details.': 'يرجى إكمال الحالة والعنوان والتفاصيل.',
+  'Recommendation saved successfully.': 'تم حفظ التوصية بنجاح.',
+  'Specialist guidance for teachers and parents.': 'إرشادات الأخصائي للمعلمين وأولياء الأمور.',
+  'Today events': 'أحداث اليوم',
+  'Chronological behavioral events with patient context and clinical severity.': 'أحداث سلوكية زمنية مع سياق الحالة ومستوى الشدة السريرية.',
+  'Clinical note added': 'تمت إضافة ملاحظة سريرية',
+  'Related patient': 'الحالة المرتبطة',
+  'alert': 'تنبيه',
+  'note': 'ملاحظة',
+  'robot': 'الروبوت',
+  'plan': 'خطة',
+  'Therapy plan updated': 'تم تحديث الخطة العلاجية',
+  'Recent notes': 'الملاحظات الأخيرة',
+  'Pending reports': 'تقارير بانتظار المراجعة',
+  'Note opened for clinical review.': 'تم فتح الملاحظة للمراجعة السريرية.',
+  'Review plans that need updates before issuing new recommendations.': 'راجع الخطط التي تحتاج إلى تحديث قبل إصدار توصيات جديدة.',
+  'Review elevated stress patterns before changing intervention intensity.': 'راجع أنماط التوتر المرتفعة قبل تغيير شدة التدخل.',
+  'Continue monitoring classroom evidence and therapy progress.': 'استمر في متابعة أدلة الصف وتقدم الخطة العلاجية.',
+  'Review stress patterns before updating intervention plans.': 'راجع أنماط التوتر قبل تحديث خطط التدخل',
+  'Review stress patterns before updating intervention plans': 'راجع أنماط التوتر قبل تحديث خطط التدخل',
+  'Current cases are stable. Continue monitoring classroom evidence.': 'الحالات الحالية مستقرة. استمر في متابعة أدلة الصف.',
+  'Clinical follow-up based on recent classroom evidence.': 'متابعة سريرية بناءً على أدلة صفية حديثة.',
+  'High risk': 'خطر مرتفع',
+  'Needs attention': 'يحتاج إلى متابعة',
+  'Stable session': 'جلسة مستقرة',
+  'Active monitoring': 'مراقبة نشطة',
+  'Paused': 'متوقفة مؤقتًا',
+  'Ended': 'منتهية',
+  'Ready': 'جاهز',
+  'Whole class': 'الصف بالكامل',
+  'Whole Class': 'الصف بالكامل',
+  'Assigned student': 'الطالب المسند',
+  'Session started': 'بدأت الجلسة',
+  'Critical alert detected': 'تم رصد تنبيه حرج',
+  'Alert detected': 'تم رصد تنبيه',
+  'Teacher note added': 'تمت إضافة ملاحظة المعلم',
+  'Robot support executed': 'تم تنفيذ دعم الروبوت',
+  'Calm mode and repeat instruction were used during the session.': 'تم استخدام وضع التهدئة وتكرار التعليمات خلال الجلسة.',
+  'Positive reinforcement and group prompts were used during the session.': 'تم استخدام التعزيز الإيجابي والتوجيهات الجماعية خلال الجلسة.',
+  'Calm mode activated for stress spikes': 'تم تفعيل وضع التهدئة عند ارتفاع التوتر',
+  'Repeat instruction used after low attention': 'تم استخدام تكرار التعليمات بعد انخفاض الانتباه',
+  'Teacher alert dispatched for follow-up': 'تم إرسال تنبيه للمعلم للمتابعة',
+  'Positive prompt delivered to whole class': 'تم تقديم توجيه إيجابي للصف بالكامل',
+  'Robot maintained active support mode': 'حافظ الروبوت على وضع الدعم النشط',
+  'No emergency stop events recorded': 'لم يتم تسجيل أي إيقاف طارئ',
+  'Normal Class': 'صف مستقر',
+  'Stable classroom behavior': 'سلوك صفي مستقر',
+  'High Stress Student': 'طالب بتوتر مرتفع',
+  'Selected student stress rises gradually': 'يرتفع توتر الطالب المحدد تدريجيًا',
+  'Low Attention Student': 'طالب بانتباه منخفض',
+  'Selected student attention drops gradually': 'ينخفض انتباه الطالب المحدد تدريجيًا',
+  'Low Engagement Group': 'مجموعة بتفاعل منخفض',
+  'Several students disengage': 'ينخفض تفاعل عدة طلاب',
+  'Relax / Calm State': 'حالة هادئة',
+  'Stress decreases and class stabilizes': 'ينخفض التوتر ويستقر الصف',
+  'Multiple Alerts': 'تنبيهات متعددة',
+  'Several students trigger alerts': 'تظهر تنبيهات لدى عدة طلاب',
+  'Robot Calm Success': 'نجاح تهدئة الروبوت',
+  'Stress rises then calm mode works': 'يرتفع التوتر ثم ينجح وضع التهدئة',
+  'Activity Change Success': 'نجاح تغيير النشاط',
+  'Engagement improves after activity change': 'يتحسن التفاعل بعد تغيير النشاط',
+  'Session Started': 'بدأت الجلسة',
+  'Session Paused': 'تم إيقاف الجلسة مؤقتًا',
+  'Session Resumed': 'تم استئناف الجلسة',
+  'Session Ended': 'انتهت الجلسة',
+  'Scenario Changed': 'تم تغيير السيناريو',
+  'Student Focus Opened': 'تم فتح تركيز الطالب',
+  'Alert Handled': 'تمت معالجة التنبيه',
+  'Robot Action': 'إجراء الروبوت',
+  'Teacher paused live simulation.': 'أوقف المعلم المحاكاة المباشرة مؤقتًا.',
+  'Teacher resumed live simulation.': 'استأنف المعلم المحاكاة المباشرة.',
+  'Class session ended and summary is ready.': 'انتهت جلسة الصف وأصبح الملخص جاهزًا.',
+  'Teacher marked alert as handled.': 'حدد المعلم التنبيه كمعالج.',
+  'Stress decreasing': 'التوتر ينخفض',
+  'Attention improving': 'الانتباه يتحسن',
+  'Support active': 'الدعم نشط',
+  'Monitoring': 'المراقبة جارية',
+  'Standby': 'في وضع الاستعداد',
+  'Waiting': 'بانتظار الإجراء',
+  'Active': 'نشط',
+  'calm mode': 'وضع التهدئة',
+  'change activity': 'تغيير النشاط',
+  'repeat instruction': 'تكرار التعليمات',
+  'group engagement prompt': 'توجيه تفاعل جماعي',
+  'praise': 'تعزيز إيجابي',
+  'emergency stop': 'إيقاف طارئ',
+  'attention': 'الانتباه',
+  'engagement': 'التفاعل',
+  'stress': 'التوتر',
+  'normal': 'طبيعي',
+  'mild': 'خفيف',
+  'moderate': 'متوسط',
+  'not_applicable': 'غير منطبق',
+  'Sun': 'الأحد',
+  'Mon': 'الاثنين',
+  'Tue': 'الثلاثاء',
+  'Wed': 'الأربعاء',
+  'Thu': 'الخميس',
+  'Fri': 'الجمعة',
+  'W1': 'الأسبوع ١',
+  'W2': 'الأسبوع ٢',
+  'W3': 'الأسبوع ٣',
+  'W4': 'الأسبوع ٤',
+  'D1': 'اليوم ١',
+  'D2': 'اليوم ٢',
+  'D3': 'اليوم ٣',
+  'D4': 'اليوم ٤',
+  'D5': 'اليوم ٥',
+  'D6': 'اليوم ٦',
+  'D7': 'اليوم ٧',
+  'D8': 'اليوم ٨',
+  'Started 09:00': 'بدأت 09:00',
+  'Balanced classroom': 'صف متوازن',
+  'Stable class': 'صف مستقر',
+  'Classwide focus': 'تركيز الصف',
+  'Improving participation': 'تحسن المشاركة',
+  'Healthy classroom': 'صف صحي',
+  'Action required': 'إجراء مطلوب',
+  'Class engagement is improving and no students currently require urgent follow-up.': 'يتحسن تفاعل الصف ولا يوجد طلاب يحتاجون حاليًا إلى متابعة عاجلة.',
+  'The class is stable. Reinforce engagement with positive prompts and predictable transitions.': 'الصف مستقر. عزز التفاعل بتوجيهات إيجابية وانتقالات واضحة يمكن توقعها.',
+  'Use short praise prompts during collaborative work.': 'استخدم عبارات تعزيز قصيرة أثناء العمل التعاوني.',
+  'Keep transition cues consistent across the class.': 'حافظ على ثبات إشارات الانتقال على مستوى الصف.',
+  'Continue monitoring stress signals for early changes.': 'واصل متابعة مؤشرات التوتر لرصد أي تغيرات مبكرة.',
+  'Use calm robot mode before group transitions.': 'استخدم وضع تهدئة الروبوت قبل الانتقالات الجماعية.',
+  'Reduce long verbal instructions and add short visual cues.': 'قلل التعليمات الشفهية الطويلة وأضف إشارات بصرية قصيرة.',
+  'Document stress triggers in session notes for follow-up.': 'وثق محفزات التوتر في ملاحظات الجلسة للمتابعة.',
+  'Break instructions into shorter chunks.': 'قسّم التعليمات إلى أجزاء أقصر.',
+  'Use repeat instruction when attention drops below threshold.': 'استخدم تكرار التعليمات عند انخفاض الانتباه دون المستوى المطلوب.',
+  'Redirect using one supportive prompt before escalating alerts.': 'أعد التوجيه بعبارة داعمة واحدة قبل تصعيد التنبيهات.',
+  'Assigned student': 'الطالب المسند',
+  'high stress student': 'طالب بتوتر مرتفع',
+  'low attention student': 'طالب بانتباه منخفض',
+  'low engagement group': 'مجموعة بتفاعل منخفض',
+  'multiple alerts': 'تنبيهات متعددة',
+  'robot calm success': 'نجاح تهدئة الروبوت',
+  'activity change success': 'نجاح تغيير النشاط',
+  'offline': 'غير متصل',
+  'disconnected': 'غير متصل',
+  'Camera Offline': 'الكاميرا غير متصلة',
+  "Abdullah's Weekly Progress Summary": 'ملخص التقدم الأسبوعي لعبدالله',
+  "Activate calm mode when Abdullah's stress rises above 65% instead of waiting for critical level.": 'فعّل وضع التهدئة عندما يرتفع توتر عبدالله فوق 65% بدلاً من الانتظار حتى المستوى الحرج.',
+  'Use repeat instruction when attention drops below 45%.': 'استخدم تكرار التعليمات عندما ينخفض الانتباه دون 45%.',
+  'Grade 3': 'الصف الثالث',
+  'SWAYA Demo School': 'مدرسة SWAYA التجريبية',
+  'Available reports': 'التقارير المتاحة',
+  'Reports this week': 'تقارير هذا الأسبوع',
+  'Latest report': 'آخر تقرير',
+  'Needs parent review': 'يحتاج إلى مراجعة من ولي الأمر',
+  'Clear reports that explain progress and home support steps.': 'تقارير واضحة تشرح التقدم وخطوات الدعم في المنزل.',
+  'Search reports...': 'ابحث في التقارير...',
+  'Social Interaction Report': 'تقرير التفاعل الاجتماعي',
+  'Calming Support Summary': 'ملخص دعم التهدئة',
+  'Abdullah shared more calmly during group work and responded well to gentle prompts.': 'شارك عبدالله بهدوء أكبر أثناء العمل الجماعي واستجاب جيدًا للتوجيهات اللطيفة.',
+  'Calming support helped Abdullah return to the activity with less stress.': 'ساعد دعم التهدئة عبدالله على العودة إلى النشاط بتوتر أقل.',
+  'Report opened for review.': 'تم فتح التقرير للمراجعة.',
+  'Report download prepared.': 'تم تجهيز تنزيل التقرير.',
+  'Positive points': 'نقاط إيجابية',
+  'Needs support': 'يحتاج إلى دعم',
+  'Use a short visual cue before changing tasks.': 'استخدم إشارة بصرية قصيرة قبل تغيير المهام.',
+  'Use the same calming phrase at home and school.': 'استخدم عبارة التهدئة نفسها في المنزل والمدرسة.',
+  'Active recommendations': 'التوصيات النشطة',
+  'Completed': 'مكتملة',
+  'Home tips': 'نصائح منزلية',
+  'Small home actions that support steady progress without pressure.': 'خطوات منزلية بسيطة تدعم التقدم المستقر دون ضغط.',
+  'Prepare before activity transitions': 'التحضير قبل الانتقال بين الأنشطة',
+  'Tell Abdullah what will change next using one short sentence and a visual cue.': 'أخبر عبدالله بما سيتغير بعد ذلك بجملة قصيرة وإشارة بصرية.',
+  'It lowers surprise and helps him move calmly between activities.': 'يساعد ذلك على تقليل المفاجأة والانتقال بهدوء بين الأنشطة.',
+  'Before homework and bedtime transitions': 'قبل الواجب والانتقال إلى وقت النوم',
+  'Easy': 'سهل',
+  'Encourage calm communication': 'تشجيع التواصل الهادئ',
+  'Use a calm voice and give Abdullah time to answer without rushing.': 'استخدم صوتًا هادئًا وامنح عبدالله وقتًا للإجابة دون استعجال.',
+  'It supports confidence and reduces pressure during communication.': 'يدعم ذلك الثقة ويخفف الضغط أثناء التواصل.',
+  '5 minutes daily': '٥ دقائق يوميًا',
+  'Category': 'الفئة',
+  'Why it helps': 'لماذا يساعد',
+  'Duration': 'المدة',
+  'Difficulty': 'مستوى السهولة',
+  'Three times per week': 'ثلاث مرات أسبوعيًا',
+  'Recommendation marked as completed.': 'تم تحديد التوصية كمكتملة.',
+  'Guidance opened for selected recommendation.': 'تم فتح الإرشادات للتوصية المحددة.',
+  'Mark as completed': 'تحديد كمكتملة',
+  'Communication': 'التواصل',
+  'Stress Reduction': 'خفض التوتر',
+  'Routine': 'الروتين',
+  'Participation': 'المشاركة',
+  'Recent sessions': 'الجلسات الأخيرة',
+  'Latest session': 'آخر جلسة',
+  'Simple summaries of classroom sessions and helpful home follow-up.': 'ملخصات مبسطة للجلسات الصفية وخطوات متابعة منزلية مفيدة.',
+  'Needed gentle support': 'احتاج إلى دعم لطيف',
+  'Repeat instruction and calm prompt': 'تكرار التعليمات وتوجيه هادئ',
+  'Abdullah participated after instructions were shortened.': 'شارك عبدالله بعد تقصير التعليمات.',
+  'Reading time was positive overall, with extra help during transitions.': 'كان وقت القراءة إيجابيًا بشكل عام مع دعم إضافي أثناء الانتقالات.',
+  'Read one short story together and pause for calm questions.': 'اقرؤوا قصة قصيرة معًا وتوقفوا لطرح أسئلة هادئة.',
+  'Positive prompt delivered': 'تم تقديم توجيه إيجابي',
+  'Abdullah joined the story activity with steady attention.': 'شارك عبدالله في نشاط القصة بانتباه مستقر.',
+  'The story activity supported engagement and calm participation.': 'دعم نشاط القصة التفاعل والمشاركة الهادئة.',
+  'Ask Abdullah to retell one part of the story at home.': 'اطلب من عبدالله أن يعيد سرد جزء واحد من القصة في المنزل.',
+  'The collaborative puzzle helped participation after calming support.': 'ساعد اللغز التعاوني على تعزيز المشاركة بعد دعم التهدئة.',
+  'View session details': 'عرض تفاصيل الجلسة',
+  'Progress highlights': 'أبرز نقاط التقدم',
+  'Support used': 'الدعم المستخدم',
+  'Home follow-up tip': 'نصيحة متابعة منزلية',
+  'Communication panel': 'لوحة التواصل',
+  'Messages from the teacher, specialist, and SWAYA updates.': 'رسائل من المعلم والأخصائي وتحديثات SWAYA.',
+  'Send a calm, clear question or update to the support team.': 'أرسل سؤالًا أو تحديثًا واضحًا وهادئًا إلى فريق الدعم.',
+  'Please write a message before sending.': 'يرجى كتابة رسالة قبل الإرسال.',
+  'Message sent': 'تم إرسال الرسالة',
+  'Recipient': 'المستلم',
+  'Subject': 'الموضوع',
+  'General question': 'سؤال عام',
+  'Home update': 'تحديث منزلي',
+  'Need guidance': 'أحتاج إلى إرشاد',
+  'Send message': 'إرسال الرسالة',
+  'Unread': 'غير مقروء',
+  'System': 'النظام',
+  'published': 'منشور',
+  'draft': 'مسودة',
+  'pending': 'بانتظار المراجعة',
+  'monthly': 'شهري',
+  'info': 'معلومة',
+  'gray': 'غير محدد',
+  'A new parent-safe report is available.': 'يتوفر تقرير مناسب لولي الأمر.',
+  'A weekly progress report is ready for your review.': 'تقرير التقدم الأسبوعي جاهز للمراجعة.',
+  'Abdullah participated well today after a short calming prompt.': 'شارك عبدالله بشكل جيد اليوم بعد توجيه تهدئة قصير.',
+  'Abdullah parent': 'ولي أمر عبدالله',
+  'Continue the supportive routine.': 'استمر في الروتين الداعم.',
+  'Encourage positive participation at home.': 'شجّع المشاركة الإيجابية في المنزل.',
+  'Mona Hassan': 'منى حسن',
+  'Dr. Ahmed Sami': 'د. أحمد سامي',
+  "Abdullah's Parent": 'ولي أمر عبدالله',
+  'Abdullah Ali': 'عبدالله علي',
+  'Abdullah': 'عبدالله',
+  'Sara M.': 'سارة محمد',
+  'Sara': 'سارة',
+  'Omar H.': 'عمر حسن',
+  'Omar': 'عمر',
+  'Layla K.': 'ليلى خالد',
+  'Layla': 'ليلى',
+  'Youssef T.': 'يوسف طارق',
+  'Youssef': 'يوسف',
+  'Noor A.': 'نور أحمد',
+  'Noor': 'نور',
+  'Ibrahim S.': 'إبراهيم سامي',
+  'Ibrahim': 'إبراهيم',
+  'Hana M.': 'هنا محمود',
+  'Hana': 'هنا',
+  'Moderate': 'متوسط',
+  'Mild': 'بسيط',
+  'Severe': 'شديد',
+  'Not applicable': 'غير منطبق',
+  'yesterday': 'أمس',
+  'minutes ago': 'منذ دقائق',
+  'hours ago': 'منذ ساعات',
+  'days ago': 'منذ أيام',
+  'this month': 'هذا الشهر',
+  'today': 'اليوم',
+  'last session': 'آخر جلسة',
+  'compared to last week': 'مقارنة بالأسبوع الماضي',
+  'from last session': 'مقارنة بآخر جلسة',
+  "{{name}}'s Progress": 'تقدم {{name}}',
 };
+
+const arabicNumber = value => new Intl.NumberFormat('ar-AE').format(Number(value));
+
+function formatArabicDate(value, options) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat('ar-AE', options).format(date);
+}
+
+function translateGeneratedArabic(text) {
+  const value = String(text);
+  const direct = ar[value];
+  if (direct) return direct;
+
+  let match = value.match(/^(\d+) active alerts still need review before the weekly class summary is finalized\.$/);
+  if (match) return `لا تزال هناك ${arabicNumber(match[1])} تنبيهات نشطة تحتاج إلى مراجعة قبل اعتماد الملخص الأسبوعي للصف.`;
+
+  match = value.match(/^(\d+) students need additional teacher follow-up after recent live sessions\.$/);
+  if (match) {
+    return Number(match[1]) === 1
+      ? 'يوجد طالب واحد يحتاج إلى متابعة إضافية من المعلم بعد الجلسات المباشرة الأخيرة.'
+      : `يوجد ${arabicNumber(match[1])} طلاب يحتاجون إلى متابعة إضافية من المعلم بعد الجلسات المباشرة الأخيرة.`;
+  }
+
+  match = value.match(/^(\d+) students show elevated stress signals\. Use calm mode and shorter transitions before stress escalates\.$/);
+  if (match) return `تظهر لدى ${arabicNumber(match[1])} من الطلاب مؤشرات توتر مرتفعة. استخدم وضع التهدئة وفترات انتقال أقصر قبل زيادة التوتر.`;
+
+  match = value.match(/^(\d+) students need additional attention support\. Use repeat instruction and shorter task blocks\.$/);
+  if (match) return `يحتاج ${arabicNumber(match[1])} من الطلاب إلى دعم إضافي للانتباه. استخدم تكرار التعليمات وتقسيم المهام إلى فترات أقصر.`;
+
+  match = value.match(/^(\d+)% engagement and (\d+) alerts recorded during this session\.$/);
+  if (match) return `تم تسجيل تفاعل بنسبة ${arabicNumber(match[1])}% و${arabicNumber(match[2])} تنبيهات خلال هذه الجلسة.`;
+
+  match = value.match(/^(.+) Session Report$/);
+  if (match) return `${translateGeneratedArabic(match[1])} - تقرير الجلسة`;
+
+  match = value.match(/^(.+) delivered (\d+)% engagement with (\d+) monitored alerts across the class\.$/);
+  if (match) return `حققت ${translateGeneratedArabic(match[1])} تفاعلاً بنسبة ${arabicNumber(match[2])}% مع ${arabicNumber(match[3])} تنبيهات تمت مراقبتها على مستوى الصف.`;
+
+  match = value.match(/^(.+) started for Inclusive Class A\.$/);
+  if (match) return `بدأت ${translateGeneratedArabic(match[1])} للصف الدامج أ.`;
+
+  match = value.match(/^(.+) live session started\.$/);
+  if (match) return `بدأت الجلسة المباشرة لـ ${translateGeneratedArabic(match[1])}.`;
+
+  match = value.match(/^Teacher focused on (.+)\.$/);
+  if (match) return `ركز المعلم على ${translateGeneratedArabic(match[1])}.`;
+
+  match = value.match(/^(.+): (.+)$/);
+  if (match) return `${translateGeneratedArabic(match[1])}: ${translateGeneratedArabic(match[2])}`;
+
+  match = value.match(/^(.+) activated\.$/);
+  if (match) return `تم تفعيل ${translateGeneratedArabic(match[1])}.`;
+
+  match = value.match(/^(\d+) need follow-up$/);
+  if (match) return `${arabicNumber(match[1])} يحتاجون إلى متابعة`;
+
+  match = value.match(/^(\d+) this week$/);
+  if (match) return `${arabicNumber(match[1])} هذا الأسبوع`;
+
+  match = value.match(/^([+-]?\d+%) this week$/);
+  if (match) return `${match[1]} هذا الأسبوع`;
+
+  match = value.match(/^([+-]?\d+%) this month$/);
+  if (match) return `${match[1]} هذا الشهر`;
+
+  match = value.match(/^([+-]?\d+%) today$/);
+  if (match) return `${match[1]} اليوم`;
+
+  match = value.match(/^([+-]?\d+%) from last session$/);
+  if (match) return `${match[1]} مقارنة بآخر جلسة`;
+
+  match = value.match(/^(\d+) need monitoring$/);
+  if (match) return `${arabicNumber(match[1])} يحتاجون إلى مراقبة`;
+
+  match = value.match(/^(\d+) need update$/);
+  if (match) return `${arabicNumber(match[1])} تحتاج إلى تحديث`;
+
+  match = value.match(/^(.+) active$/);
+  if (match) return `${translateGeneratedArabic(match[1])} نشط`;
+
+  match = value.match(/^Engagement is improving, while stress remains elevated for (\d+) students\.$/);
+  if (match) return `يتحسن التفاعل، بينما لا تزال مؤشرات التوتر مرتفعة لدى ${arabicNumber(match[1])} من الطلاب.`;
+
+  match = value.match(/^(.+) min$/);
+  if (match) return `${arabicNumber(match[1])} دقيقة`;
+
+  match = value.match(/^1 min ago$/);
+  if (match) return 'منذ دقيقة';
+
+  match = value.match(/^2 min ago$/);
+  if (match) return 'منذ دقيقتين';
+
+  match = value.match(/^(\d+) min ago$/);
+  if (match) return `منذ ${arabicNumber(match[1])} دقائق`;
+
+  match = value.match(/^1 hour ago$/);
+  if (match) return 'منذ ساعة';
+
+  match = value.match(/^2 hours ago$/);
+  if (match) return 'منذ ساعتين';
+
+  match = value.match(/^1 hr ago$/);
+  if (match) return 'منذ ساعة';
+
+  match = value.match(/^2 hr ago$/);
+  if (match) return 'منذ ساعتين';
+
+  match = value.match(/^(\d+) hr ago$/);
+  if (match) return `منذ ${arabicNumber(match[1])} ساعات`;
+
+  match = value.match(/^(\d+) hours ago$/);
+  if (match) return `منذ ${arabicNumber(match[1])} ساعات`;
+
+  match = value.match(/^(\d+) days ago$/);
+  if (match) return `منذ ${arabicNumber(match[1])} يومًا`;
+
+  match = value.match(/^(ASD|Typical) · (moderate|mild|severe|not_applicable|Moderate|Mild|Severe|Not applicable)$/);
+  if (match) return `${translateGeneratedArabic(match[1])} · ${translateGeneratedArabic(match[2])}`;
+
+  match = value.match(/^(\d{4}-\d{2}-\d{2}) · (\d+) min$/);
+  if (match) {
+    const date = formatArabicDate(match[1], { day: 'numeric', month: 'long', year: 'numeric' });
+    return `${date || match[1]} · ${arabicNumber(match[2])} دقيقة`;
+  }
+
+  match = value.match(/^(.+) · (critical|warning|info|success|active|stable|handled)$/);
+  if (match) return `${match[1]} · ${translateGeneratedArabic(match[2])}`;
+
+  match = value.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), (\d{4})$/);
+  if (match) return formatArabicDate(`${match[1]} ${match[2]}, ${match[3]}`, { day: 'numeric', month: 'long', year: 'numeric' }) || value;
+
+  match = value.match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), (\d{1,2}:\d{2} [AP]M)$/);
+  if (match) return formatArabicDate(`${match[1]} ${match[2]}, 2026 ${match[3]}`, { day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) || value;
+
+  if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return formatArabicDate(value, { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }) || value;
+  }
+
+  return value;
+}
 
 const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
-  const [language, setLanguage] = useState(() => localStorage.getItem(STORAGE_KEY) || 'en');
+  const [language, setLanguage] = useState(getInitialLanguage);
   const isArabic = language === 'ar';
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, language);
+    localStorage.setItem(I18NEXT_STORAGE_KEY, language);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
     document.documentElement.lang = language;
     document.documentElement.dir = isArabic ? 'rtl' : 'ltr';
   }, [language, isArabic]);
@@ -554,7 +1381,11 @@ export function I18nProvider({ children }) {
     toggleLanguage: () => setLanguage(current => current === 'ar' ? 'en' : 'ar'),
     t: (text, vars = {}) => {
       if (text === undefined || text === null) return '';
-      const translated = isArabic ? ar[text] || text : text;
+      if (typeof text === 'object') {
+        vars = text.vars || vars;
+        text = text.label;
+      }
+      const translated = isArabic ? translateGeneratedArabic(text) : text;
       return Object.entries(vars).reduce((result, [key, value]) => result.replaceAll(`{{${key}}}`, value), translated);
     },
   }), [language, isArabic]);

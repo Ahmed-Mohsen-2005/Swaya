@@ -65,8 +65,8 @@ export default function TeacherGuidance() {
             {page.classGuidance.length ? page.classGuidance.map(item => (
               <div key={item.id} className="teacher-recommendation-card">
                 <StatusBadge status="blue">{item.category}</StatusBadge>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
+                <h3>{t(item.title)}</h3>
+                <p>{t(item.description)}</p>
                 <span>{item.student}</span>
               </div>
             )) : <EmptyState title="No data yet" description="Recommendations will appear here when available." />}
