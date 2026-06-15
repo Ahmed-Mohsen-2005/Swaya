@@ -50,7 +50,7 @@ export default function ParentProgress() {
     ];
   }, [state.progress]);
 
-  if (state.loading) return <LoadingState title="Loading workspace data" />;
+  if (state.loading) return <LoadingState />;
   if (!state.child || !state.progress) return <EmptyState title="No data yet" description="Content will appear here when available." />;
 
   const { child, progress } = state;

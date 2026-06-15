@@ -12,7 +12,7 @@ import { useLiveSessionStore } from '../../store/liveSessionStore';
 import { useI18n } from '../../i18n';
 import { displayName, initialsForEntity } from '../../utils/localization';
 
-const fadeItem = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 4 }, transition: { duration: 0.18 } };
+const fadeItem = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.14 } };
 const fadeOnly = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.16 } };
 
 export function SessionHeader({ classes, selectedClassId, setSelectedClassId, onStart }) {
@@ -124,7 +124,7 @@ export function AlertsPanel() {
           {activeAlerts.length === 0
             ? <motion.div {...fadeItem} className="muted">{t('No active alerts. Class status is stable.')}</motion.div>
             : activeAlerts.map(alert => (
-              <motion.div {...fadeItem} layout key={alert.id} className={`alert-card ${alert.severity === 'critical' ? 'critical' : ''}`}>
+              <motion.div {...fadeItem} key={alert.id} className={`alert-card ${alert.severity === 'critical' ? 'critical' : ''}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <div><b>{t(alert.studentName)}</b><div className="small muted">{t(alert.type.replace('_', ' '))}</div></div>
                   <StatusBadge status={severityTone(alert.severity)}>{t(severityLabel(alert.severity))}</StatusBadge>
@@ -213,7 +213,7 @@ export function StudentFocus() {
   const data = st.metricHistory.map(point => ({ time: point.time, attention: metrics.attention + (Math.random() * 8 - 4), stress: metrics.stress + (Math.random() * 8 - 4) }));
 
   return (
-    <motion.div layout>
+    <div>
       <Card>
         <div className="section-title">
           <h2>{t('Student Focus')}: {displayName(student, language)}</h2>
@@ -230,7 +230,7 @@ export function StudentFocus() {
           <MiniLineChart data={data} />
         </div>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 

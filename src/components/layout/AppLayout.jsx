@@ -169,7 +169,7 @@ export function AppLayout() {
               </button>
               <AnimatePresence>
                 {menuOpen && (
-                  <motion.div className="profile-dropdown" role="menu" initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ duration: 0.16 }}>
+                  <motion.div className="profile-dropdown" role="menu" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.14 }}>
                     <div className="profile-dropdown-head">
                       {avatar ? <img className="avatar avatar-lg" src={avatar} alt=""/> : <span className="avatar avatar-lg">{initials}</span>}
                       <div><b>{userName}</b><span>{t(role)}</span></div>
@@ -189,7 +189,7 @@ export function AppLayout() {
         </header>
         {mobileSearchOpen && <div className="mobile-search-row"><GlobalSearch className="mobile-search"/></div>}
         <div className="content">
-          <AnimatePresence mode="wait"><PageTransition key={loc.pathname}><Outlet/></PageTransition></AnimatePresence>
+          <PageTransition key={loc.pathname}><Outlet/></PageTransition>
         </div>
       </main>
     </div>

@@ -90,7 +90,7 @@ export function GlobalSearch({ className = '' }) {
       </label>
       <AnimatePresence>
         {open && (
-          <motion.div className="search-results" role="listbox" initial={{ opacity: 0, y: -5, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ duration: 0.14 }}>
+          <motion.div className="search-results" role="listbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}>
             {results.length === 0 ? <div className="search-empty">{t('No results found')}</div> : Object.entries(grouped).map(([category, items]) => (
               <div className="search-group" key={category}>
                 <div className="search-group-label">{t(category)}</div>

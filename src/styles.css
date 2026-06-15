@@ -24,6 +24,7 @@
 
 html {
   overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -68,6 +69,7 @@ button { -webkit-tap-highlight-color: transparent; }
   display: flex;
   flex-direction: column;
   width: 220px;
+  min-width: 220px;
   padding: 16px 12px;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.88);
@@ -116,7 +118,7 @@ button { -webkit-tap-highlight-color: transparent; }
   color: var(--ink-2);
   font-size: 13px;
   font-weight: 700;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .nav-item svg {
@@ -142,7 +144,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .nav-item:hover {
   background: rgba(234, 246, 253, 0.78);
   border-color: rgba(137, 207, 240, 0.34);
-  transform: translateX(1px);
 }
 
 .nav-item.active {
@@ -186,6 +187,7 @@ button { -webkit-tap-highlight-color: transparent; }
   width: calc(100% - 220px);
   min-height: 100vh;
   margin-left: 220px;
+  overflow-x: hidden;
 }
 
 [dir="rtl"] .main {
@@ -201,6 +203,7 @@ button { -webkit-tap-highlight-color: transparent; }
   align-items: center;
   justify-content: space-between;
   min-height: 62px;
+  height: 62px;
   padding: 0 22px;
   background: rgba(255, 255, 255, 0.9);
   border-bottom: 1px solid rgba(215, 234, 244, 0.78);
@@ -227,7 +230,7 @@ button { -webkit-tap-highlight-color: transparent; }
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 8px 20px rgba(13, 43, 87, 0.045);
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .language-toggle:hover,
@@ -239,7 +242,6 @@ button { -webkit-tap-highlight-color: transparent; }
   background: #FFFFFF;
   border-color: rgba(137, 207, 240, 0.7);
   box-shadow: 0 12px 28px rgba(13, 43, 87, 0.08);
-  transform: translateY(-1px);
   outline: none;
 }
 
@@ -640,7 +642,7 @@ button { -webkit-tap-highlight-color: transparent; }
   font-weight: 800;
   text-align: left;
   cursor: pointer;
-  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 [dir="rtl"] .profile-dropdown button { text-align: right; }
@@ -687,7 +689,18 @@ button { -webkit-tap-highlight-color: transparent; }
 .account-placeholder p { margin: 0; }
 
 .content { padding: 20px; }
-.page-transition { display: grid; gap: 14px; }
+.content {
+  min-height: calc(100vh - 62px);
+  overflow-x: hidden;
+}
+.page-transition {
+  display: grid;
+  gap: 14px;
+  min-height: calc(100vh - 102px);
+  min-width: 0;
+  align-content: start;
+  will-change: opacity;
+}
 .grid { display: grid; gap: 14px; min-width: 0; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -704,14 +717,13 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .interactive,
 .student-card {
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .interactive { cursor: pointer; }
 .interactive:hover,
 .student-card:hover,
 .student-card.focused {
-  transform: translateY(-2px);
   border-color: rgba(56, 174, 234, 0.45);
   box-shadow: var(--shadow-hover);
 }
@@ -736,7 +748,7 @@ button { -webkit-tap-highlight-color: transparent; }
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .btn svg { width: 17px; height: 17px; stroke-width: 1.9; }
@@ -858,7 +870,7 @@ textarea:focus {
   font-size: 11.5px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .pill:hover {
@@ -1538,11 +1550,10 @@ textarea:focus {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--shadow-sm);
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .landing-role-card:hover {
-  transform: translateY(-4px);
   border-color: rgba(173, 214, 234, 0.95);
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 18px 32px rgba(13, 43, 87, 0.08);
@@ -1900,6 +1911,7 @@ body {
 
 .sidebar {
   width: 232px;
+  min-width: 232px;
   padding: 14px 11px;
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(220, 234, 242, 0.92);
@@ -1978,6 +1990,7 @@ body {
 
 .topbar {
   min-height: 60px;
+  height: 60px;
   padding: 0 18px;
   gap: 14px;
   background: rgba(255, 255, 255, 0.88);
@@ -2112,8 +2125,14 @@ body {
   text-align: center;
 }
 
-.content { padding: 16px; }
-.page-transition { gap: 12px; }
+.content {
+  min-height: calc(100vh - 60px);
+  padding: 16px;
+}
+.page-transition {
+  gap: 12px;
+  min-height: calc(100vh - 92px);
+}
 .grid { gap: 12px; }
 
 .card {
@@ -2542,6 +2561,21 @@ label {
 
 .state-card p { max-width: 360px; margin: 0; }
 .state-card.error svg { color: var(--red); }
+.state-card-skeleton {
+  place-items: stretch;
+  align-content: center;
+  min-height: 118px;
+  padding: 18px;
+}
+.skeleton-line {
+  display: block;
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #EEF4F8 0%, #F7FBFE 48%, #EEF4F8 100%);
+}
+.skeleton-line-short { width: 42%; }
+.skeleton-line-mid { width: 68%; }
 .spin { animation: spin 800ms linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -2625,14 +2659,13 @@ label {
   background: #FFFFFF;
   box-shadow: var(--shadow-sm);
   text-decoration: none;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .teacher-student-monitor-card:hover,
 .teacher-recommendation-card:hover,
 .teacher-report-card:hover,
 .teacher-note-card:hover {
-  transform: translateY(-2px);
   border-color: rgba(56, 174, 234, 0.42);
   box-shadow: var(--shadow-md);
   background: #FBFEFF;
@@ -2912,7 +2945,7 @@ label {
   .main,
   [dir="rtl"] .main { width: 100%; margin-left: 0; margin-right: 0; }
   .mobile-menu { display: inline-flex; }
-  .topbar { min-height: 60px; padding: 10px 12px; gap: 10px; }
+  .topbar { min-height: 60px; height: 60px; padding: 10px 12px; gap: 10px; }
   .topbar-left { flex: 1 1 auto; }
   .topbar-search { display: none; }
   .page-title { min-width: 0; }
@@ -3216,11 +3249,10 @@ label {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: #FFFFFF;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .priority-row:hover {
-  transform: translateY(-1px);
   border-color: rgba(56, 174, 234, 0.38);
   box-shadow: var(--shadow-sm);
   background: #FBFEFF;
@@ -3616,7 +3648,7 @@ label {
   color: var(--ink);
   text-align: start;
   cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .parent-report-card:hover,
@@ -3633,7 +3665,7 @@ label {
 .parent-report-card.active,
 .parent-session-card.active,
 .parent-thread-item.active {
-  transform: translateY(-1px);
+  border-color: rgba(56, 174, 234, 0.48);
 }
 
 .parent-card-title-row {
@@ -4328,11 +4360,10 @@ label {
   border-radius: var(--radius-xl);
   background: rgba(255, 255, 255, 0.86);
   box-shadow: var(--shadow-sm);
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
 .auth-feature-card:hover {
-  transform: translateY(-2px);
   border-color: rgba(56, 174, 234, 0.28);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--shadow-md);
@@ -4767,6 +4798,7 @@ label {
 
   .topbar {
     min-height: calc(58px + env(safe-area-inset-top, 0px));
+    height: calc(58px + env(safe-area-inset-top, 0px));
     padding: env(safe-area-inset-top, 0px) 14px 10px;
     gap: 10px;
   }
@@ -4826,6 +4858,7 @@ label {
   }
 
   .content {
+    min-height: calc(100vh - 58px - env(safe-area-inset-top, 0px));
     padding: 16px;
   }
 

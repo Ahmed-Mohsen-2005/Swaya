@@ -47,7 +47,7 @@ export function NotificationsDropdown({ open, setOpen, onOpen }) {
       </button>
       <AnimatePresence>
         {open && (
-          <motion.div className="notifications-panel" role="dialog" aria-label={t('Notifications')} initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ duration: 0.16 }}>
+          <motion.div className="notifications-panel" role="dialog" aria-label={t('Notifications')} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.14 }}>
             <div className="notifications-head">
               <div>
                 <h2>{t('Notifications')}</h2>
