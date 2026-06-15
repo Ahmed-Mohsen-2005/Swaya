@@ -68,5 +68,6 @@ export const robotEffectFor = (action, targetStudentId, students) => {
   if(action === 'repeat_instruction' && targetStudentId) apply(targetStudentId, {attention:78, stress:35});
   if(action === 'change_activity') students.forEach(s=>apply(s.id,{attention:76, engagement:82, stress:30, socialInteraction:72}));
   if(action === 'group_engagement_prompt') students.forEach(s=>apply(s.id,{engagement:80, socialInteraction:78}));
+  if(action === 'emergency_stop') students.forEach(s=>apply(s.id,{stress:24, attention:60, engagement:58}));
   return effect;
 };

@@ -13,6 +13,7 @@ import { useI18n } from '../../i18n';
 import { displayName, initialsForEntity } from '../../utils/localization';
 
 const fadeItem = { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: 4 }, transition: { duration: 0.18 } };
+const fadeOnly = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.16 } };
 
 export function SessionHeader({ classes, selectedClassId, setSelectedClassId, onStart }) {
   const { t } = useI18n();
@@ -109,6 +110,8 @@ export function AlertsPanel() {
   const { t } = useI18n();
   const st = useLiveSessionStore();
   const activeAlerts = st.alerts.filter(alert => alert.status === 'active').slice(-5).reverse();
+  const severityTone = (severity) => severity === 'critical' || severity === 'high' ? 'critical' : severity === 'info' ? 'stable' : 'warning';
+  const severityLabel = (severity) => severity === 'critical' || severity === 'high' ? 'High risk' : severity === 'info' ? 'Info' : 'Needs follow-up';
 
   return (
     <Card>
@@ -124,7 +127,7 @@ export function AlertsPanel() {
               <motion.div {...fadeItem} layout key={alert.id} className={`alert-card ${alert.severity === 'critical' ? 'critical' : ''}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <div><b>{t(alert.studentName)}</b><div className="small muted">{t(alert.type.replace('_', ' '))}</div></div>
-                  <StatusBadge status={alert.severity === 'critical' ? 'critical' : 'warning'}>{t(alert.severity)}</StatusBadge>
+                  <StatusBadge status={severityTone(alert.severity)}>{t(severityLabel(alert.severity))}</StatusBadge>
                 </div>
                 <div style={{ margin: '9px 0' }}>
                   <b style={{ color: alert.severity === 'critical' ? 'var(--red)' : 'var(--orange)' }}>{t(alert.message)}</b>
@@ -175,13 +178,13 @@ export function StudentsGrid() {
           ))}
         </div>
       </div>
-      <motion.div layout className="grid grid-4">
+      <div className="grid grid-4 live-students-grid">
         <AnimatePresence initial={false}>
           {cards.map(student => {
             const metrics = st.currentStudentMetrics[student.id] || student.baselineMetrics;
             const status = statusFromMetrics(metrics);
             return (
-              <motion.div {...fadeItem} layout key={student.id} className={`student-card ${st.focusedStudentId === student.id ? 'focused' : ''} ${status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : ''}`} onClick={() => st.focusStudent(student.id)}>
+              <motion.div {...fadeOnly} key={student.id} className={`student-card live-student-card ${st.focusedStudentId === student.id ? 'focused' : ''} ${status === 'critical' ? 'critical' : status === 'warning' ? 'warning' : ''}`} onClick={() => st.focusStudent(student.id)}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <div className="avatar">{initialsForEntity(student, language)}</div>
                   <div><b>{displayName(student, language)}</b><div className="small muted">{student.classification === 'ASD' ? `${t('ASD')} · ${t(student.autismLevel)}` : `${t('Typical')} · ${t('Not applicable')}`}</div></div>
@@ -189,12 +192,13 @@ export function StudentsGrid() {
                 <div className="mini-row"><span>{t('Attention')}</span><b>{pct(metrics.attention)}</b></div>
                 <div className="mini-row"><span>{t('Engagement')}</span><b>{pct(metrics.engagement)}</b></div>
                 <div className="mini-row"><span>{t('Stress')}</span><b>{pct(metrics.stress)}</b></div>
+                <p className="small muted">{t(status === 'stable' ? 'Support note: stable participation.' : status === 'warning' ? 'Support note: needs follow-up.' : 'Support note: high priority support needed.')}</p>
                 <StatusBadge status={status}>{t(status)}</StatusBadge>
               </motion.div>
             );
           })}
         </AnimatePresence>
-      </motion.div>
+      </div>
       <p className="small muted">{t('Showing')} {cards.length} {t('of')} {st.students.length} {t('students')}</p>
     </Card>
   );
@@ -236,10 +240,10 @@ export function RobotControl() {
   const hasStudentTarget = Boolean(st.focusedStudentId);
   const actions = [
     ['calm_mode', 'Calm Mode', 'soft'],
-    ['praise', 'Positive Prompt', 'outline'],
+    ['praise', 'Positive Reinforcement', 'outline'],
+    ['change_activity', 'Reduce Activity', 'soft'],
     ['repeat_instruction', 'Repeat Instruction', 'soft'],
-    ['change_activity', 'Change Activity', 'outline'],
-    ['group_engagement_prompt', 'Group Prompt', 'soft'],
+    ['group_engagement_prompt', 'Group Alert', 'outline'],
   ];
 
   return (
