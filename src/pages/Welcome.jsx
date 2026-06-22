@@ -14,7 +14,7 @@ import {
   UserRound,
   Users,
 } from 'lucide-react';
-import logo from '../assets/logo-horizontal.png';
+import logo from '../assets/swaya-horizontal.png';
 import { Button } from '../components/ui/Button';
 import { useI18n } from '../i18n';
 

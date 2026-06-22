@@ -1,8 +1,8 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Activity, BarChart3, BookOpen, Camera, ChevronDown, ClipboardList, Edit3, FileText, HeartPulse, Home, KeyRound, Languages, LogOut, Menu, MessageSquare, NotebookPen, Search, Settings, Shield, UserRound, Users } from 'lucide-react';
-import logo from '../../assets/logo-horizontal.png';
+import { Activity, BarChart3, BookOpen, BookOpenCheck, Camera, ChevronDown, ClipboardList, Edit3, FileText, HeartPulse, Home, KeyRound, Languages, LogOut, Menu, MessageSquare, NotebookPen, Search, Settings, Shield, UserRound, Users } from 'lucide-react';
+import logo from '../../assets/swaya-horizontal.png';
 import { useAuthStore } from '../../store/authStore';
 import { PageTransition } from '../ui/PageTransition';
 import { useI18n } from '../../i18n';
@@ -13,13 +13,13 @@ import { dashboardService } from '../../services/dashboardService';
 import { displayName, initialsForEntity } from '../../utils/localization';
 
 const navs = {
-  teacher: [['/teacher/dashboard', Home, 'Overview'], ['/teacher/live-session', Activity, 'Live Session'], ['/teacher/students', Users, 'Students'], ['/teacher/sessions', BookOpen, 'Sessions'], ['/teacher/analytics', BarChart3, 'Class Analytics'], ['/teacher/reports', FileText, 'Reports'], ['/teacher/notes', NotebookPen, 'Notes']],
+  teacher: [['/teacher/dashboard', Home, 'Overview'], ['/teacher/live-session', Activity, 'Live Session'], ['/teacher/study-plan', BookOpenCheck, 'Study Plan'], ['/teacher/students', Users, 'Students'], ['/teacher/sessions', BookOpen, 'Sessions'], ['/teacher/analytics', BarChart3, 'Class Analytics'], ['/teacher/reports', FileText, 'Reports'], ['/teacher/notes', NotebookPen, 'Notes']],
   doctor: [['/doctor/dashboard', Home, 'Overview'], ['/doctor/patients', Users, 'Patients'], ['/doctor/analytics', BarChart3, 'Analytics'], ['/doctor/therapy-plans', HeartPulse, 'Therapy Plans'], ['/doctor/reports', FileText, 'Reports'], ['/doctor/recommendations', ClipboardList, 'Recommendations'], ['/doctor/timeline', Activity, 'Timeline']],
   parent: [['/parent/dashboard', Home, 'Overview'], ['/parent/progress', BarChart3, 'Progress'], ['/parent/reports', FileText, 'Reports'], ['/parent/recommendations', HeartPulse, 'Recommendations'], ['/parent/sessions', BookOpen, 'Sessions'], ['/parent/messages', MessageSquare, 'Messages']],
 };
 
 const titles = {
-  '/teacher/dashboard': ['Teacher Overview', 'Class insights and daily actions'], '/teacher/live-session': ['Live Class Session', 'Real-time monitoring and smart support'], '/teacher/students': ['Students', 'Assigned class students'], '/teacher/sessions': ['Sessions', 'Class session history'], '/teacher/analytics': ['Class Analytics', 'Trends, comparisons and follow-up'], '/teacher/reports': ['Reports', 'Educational and session reports'], '/teacher/notes': ['Notes', 'Session and student observations'],
+  '/teacher/dashboard': ['Teacher Overview', 'Class insights and daily actions'], '/teacher/live-session': ['Live Class Session', 'Real-time monitoring and smart support'], '/teacher/study-plan': ['Study Plan', 'Add lesson context before or during a session'], '/teacher/students': ['Students', 'Assigned class students'], '/teacher/sessions': ['Sessions', 'Class session history'], '/teacher/analytics': ['Class Analytics', 'Trends, comparisons and follow-up'], '/teacher/reports': ['Reports', 'Educational and session reports'], '/teacher/notes': ['Notes', 'Session and student observations'],
   '/teacher/recommendations': ['Guidance', 'Intervention recommendations and follow-up'],
   '/doctor/dashboard': ['Doctor Overview', 'Clinical insights and priority reviews'], '/doctor/patients': ['Patients', 'Assigned students and risk indicators'], '/doctor/analytics': ['Patient Analytics', 'Behavior trends and intervention response'], '/doctor/therapy-plans': ['Therapy Plans', 'Goals, strategies and recommendations'], '/doctor/reports': ['Reports', 'Clinical and parent-safe reports'], '/doctor/recommendations': ['Recommendations', 'Guidance for teachers and parents'], '/doctor/timeline': ['Behavior Timeline', 'Chronological behavioral events'],
   '/parent/dashboard': ['Parent Overview', 'Simple progress and live child status'], '/parent/progress': ['Child Progress', 'Friendly trends and achievements'], '/parent/reports': ['Reports', 'Parent-safe progress reports'], '/parent/recommendations': ['Recommendations', 'Home guidance and support'], '/parent/sessions': ['Session Summaries', 'Your child activity summaries'], '/parent/messages': ['Messages', 'Communication placeholder'],

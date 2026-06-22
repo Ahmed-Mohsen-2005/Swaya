@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Camera, Cpu, Radio } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { BookOpenCheck, Camera, Cpu, Radio } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useLiveSessionStore } from '../../store/liveSessionStore';
 import { dataService } from '../../services/dataService';
@@ -11,9 +12,27 @@ import { AlertsPanel, ClassMetrics, RobotControl, ScenarioController, SessionHea
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { Button } from '../../components/ui/Button';
 import { useI18n } from '../../i18n';
+import { useStudyPlanStore } from '../../store/studyPlanStore';
+import { displayName, localizedValue } from '../../utils/localization';
+
+const DEFAULT_CLASS_NAME = { ar: 'صف الدمج أ', en: 'Inclusive Class A' };
+const STUDENT_NAME_OVERRIDES = {
+  stu_001: { ar: 'عبدالله علي', en: 'Abdullah Ali' },
+  stu_002: { ar: 'سارة محمد', en: 'Sara Mohamed' },
+  stu_003: { ar: 'عمر حسن', en: 'Omar Hassan' },
+  stu_004: { ar: 'ليلى خالد', en: 'Layla Khaled' },
+  stu_005: { ar: 'يوسف طارق', en: 'Youssef Tarek' },
+  stu_006: { ar: 'نور أحمد', en: 'Noor Ahmed' },
+  stu_007: { ar: 'إبراهيم سامي', en: 'Ibrahim Sami' },
+  stu_008: { ar: 'هنا محمود', en: 'Hana Mahmoud' },
+};
+
+function studentName(student, language) {
+  return localizedValue(STUDENT_NAME_OVERRIDES[student?.id], language) || displayName(student, language) || student?.fullName || '';
+}
 
 export default function TeacherLiveSession() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const st = useLiveSessionStore();
   const [classes, setClasses] = useState([]);
@@ -21,6 +40,8 @@ export default function TeacherLiveSession() {
   const [selectedClassId, setSelectedClassId] = useState('');
   const [quickNote, setQuickNote] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
+  const { plans, selectedLivePlanId, setSelectedLivePlan, useInLiveSession } = useStudyPlanStore();
+  const selectedPlan = plans.find(plan => plan.id === selectedLivePlanId) || null;
 
   useEffect(() => {
     dataService.getClassesForTeacher(user.id).then(items => {
@@ -51,6 +72,12 @@ export default function TeacherLiveSession() {
     ['Robot Connected', Radio, st.status === 'active' ? 'online' : 'warning'],
   ];
 
+  const className = localizedValue(classes.find(item => item.id === selectedClassId)?.nameLocalized || DEFAULT_CLASS_NAME, language);
+  const selectedPlanSupportStudents = (selectedPlan?.supportStudentIds || [])
+    .map(id => students.find(student => student.id === id))
+    .filter(Boolean)
+    .map(student => studentName(student, language));
+
   return (
     <div className="grid teacher-module-page">
       <PageHeader
@@ -59,7 +86,7 @@ export default function TeacherLiveSession() {
         badge={st.status === 'active' ? 'Active monitoring' : st.status === 'paused' ? 'Paused' : st.status === 'ended' ? 'Ended' : 'Ready'}
       />
 
-      <div className="grid grid-3 teacher-live-summary">
+      <div className="grid grid-4 teacher-live-summary">
         <Card>
           <div className="teacher-section-head compact">
             <div>
@@ -68,7 +95,49 @@ export default function TeacherLiveSession() {
             </div>
             <StatusBadge status={st.status === 'active' ? 'active' : st.status === 'paused' ? 'warning' : st.status === 'ended' ? 'critical' : 'stable'}>{st.status === 'idle' ? t('Ready') : t(st.status)}</StatusBadge>
           </div>
-          <p className="small muted">{t('Class')}: {classes.find(item => item.id === selectedClassId)?.name || 'Inclusive Class A'}</p>
+          <p className="small muted">{t('Class')}: {className}</p>
+        </Card>
+
+        <Card className="live-study-plan-panel">
+          <div className="teacher-section-head compact">
+            <div>
+              <h2>{t('Study Plan')}</h2>
+              <p className="small muted">{t('Lesson context for this live session')}</p>
+            </div>
+            <BookOpenCheck size={18} />
+          </div>
+          {plans.length ? (
+            <>
+              <select
+                className="select"
+                value={selectedLivePlanId || ''}
+                onChange={event => {
+                  const planId = event.target.value;
+                  if (planId) useInLiveSession(planId);
+                  else setSelectedLivePlan('');
+                }}
+              >
+                <option value="">{t('Choose Plan')}</option>
+                {plans.map(plan => <option key={plan.id} value={plan.id}>{localizedValue(plan.title, language)}</option>)}
+              </select>
+              {selectedPlan ? (
+                <div className="live-study-plan-selected">
+                  <b>{localizedValue(selectedPlan.title, language)}</b>
+                  <span>{t('Grade / Group')}: {localizedValue(selectedPlan.className || DEFAULT_CLASS_NAME, language)}</span>
+                  <span>{t('Activity type')}: {t(selectedPlan.sourceType === 'template' ? 'Template' : selectedPlan.sourceType === 'file' ? 'File' : 'Manual')}</span>
+                  <p>{localizedValue(selectedPlan.supportNotes, language)}</p>
+                  <span>{t('Support students')}: {selectedPlanSupportStudents.length ? selectedPlanSupportStudents.join('، ') : t('No students selected')}</span>
+                </div>
+              ) : (
+                <div className="live-study-plan-empty">{t('No study plan selected for this session')}</div>
+              )}
+            </>
+          ) : (
+            <div className="live-study-plan-empty">
+              <p>{t('No study plan selected for this session')}</p>
+              <Link to="/teacher/study-plan"><Button size="sm" variant="soft">{t('Choose Plan')}</Button></Link>
+            </div>
+          )}
         </Card>
 
         <Card>

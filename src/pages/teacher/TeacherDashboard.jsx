@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, AlertTriangle, BarChart3, Eye, HeartPulse, Users } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, BookOpenCheck, Eye, HeartPulse, Users } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../../components/ui/Button';
 import { MetricCard } from '../../components/ui/MetricCard';
@@ -52,7 +52,12 @@ export default function TeacherDashboard() {
         meta={{ label: 'Last updated', value: 'just now' }}
         badge={priorityStudents.length ? { label: '{{count}} students need attention', vars: { count: priorityStudents.length } } : 'Class status is stable'}
         chips={systemChipsFromStatus(dashboard.systemStatus)}
-        actions={<Link to="/teacher/live-session"><Button size="lg"><Activity size={17} />{t('Start Live Session')}</Button></Link>}
+        actions={
+          <>
+            <Link to="/teacher/study-plan"><Button variant="soft" size="lg"><BookOpenCheck size={17} />{t('Add Study Plan')}</Button></Link>
+            <Link to="/teacher/live-session"><Button size="lg"><Activity size={17} />{t('Start Live Session')}</Button></Link>
+          </>
+        }
       />
 
       <div className="grid grid-4">

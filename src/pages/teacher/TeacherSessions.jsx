@@ -13,15 +13,18 @@ import { SearchInput } from '../../components/ui/SearchInput';
 import { useI18n } from '../../i18n';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { useStudyPlanStore } from '../../store/studyPlanStore';
+import { localizedValue } from '../../utils/localization';
 
 export default function TeacherSessions() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuthStore();
   const nav = useNavigate();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
+  const { plans } = useStudyPlanStore();
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +55,14 @@ export default function TeacherSessions() {
 
   const columns = [
     { key: 'title', header: 'Session title', render: session => <b>{t(session.title)}</b> },
+    {
+      key: 'studyPlan',
+      header: 'Study Plan',
+      render: session => {
+        const plan = plans.find(item => item.linkedSessionId === session.id);
+        return plan ? <span className="study-plan-session-pill">{t('Plan used')}: {localizedValue(plan.title, language)}</span> : <span className="small muted">{t('No linked plan')}</span>;
+      },
+    },
     { key: 'dateTimeLabel', header: 'Date/time' },
     { key: 'durationLabel', header: 'Duration' },
     { key: 'avgAttention', header: 'Attention', render: session => `${session.avgAttention}%` },

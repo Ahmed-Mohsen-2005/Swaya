@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { authService } from '../services/authService';
 import { Button } from '../components/ui/Button';
 import { useI18n } from '../i18n';
-import logo from '../assets/logo-horizontal.png';
+import logo from '../assets/swaya-horizontal.png';
 import icon from '../assets/logo-icon.png';
 
 const roleConfig = {
